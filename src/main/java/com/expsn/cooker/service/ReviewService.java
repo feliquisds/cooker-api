@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.core.aggregation.LookupOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
-import com.expsn.cooker.model.AIStatus;
+import com.expsn.cooker.model.Status;
 import com.expsn.cooker.model.Recipe;
 import com.expsn.cooker.model.Review;
 import com.expsn.cooker.repository.RecipeRepository;
@@ -36,7 +36,7 @@ public class ReviewService {
 
         // Simulação da Regra de Negócio: Revisado por IA
         // No mundo real, você faria uma chamada assíncrona ou esperaria o retorno da IA
-        review.setAiStatus(AIStatus.APPROVED);
+        review.setAiStatus(Status.APPROVED);
         return reviewRepository.save(review);
     }
 
@@ -46,7 +46,7 @@ public class ReviewService {
 
         // Se a receita for pública, mostramos todos os reviews aprovados pela IA
         if (recipe.isPublic()) {
-            return reviewRepository.findByTargetIdAndAiStatus(recipeId, AIStatus.APPROVED);
+            return reviewRepository.findByTargetIdAndAiStatus(recipeId, Status.APPROVED);
         }
 
         // Se a receita for privada:
@@ -54,7 +54,7 @@ public class ReviewService {
 
         // Se o usuário logado for o dono da receita, ele vê todos os reviews nela
         if (recipe.getAuthorId().equals(currentUserId)) {
-            return reviewRepository.findByTargetIdAndAiStatus(recipeId, AIStatus.APPROVED);
+            return reviewRepository.findByTargetIdAndAiStatus(recipeId, Status.APPROVED);
         }
 
         // Caso contrário, o usuário logado só vê o PRÓPRIO review (se ele tiver feito um)
@@ -72,7 +72,7 @@ public class ReviewService {
 
         Criteria criteria = new Criteria();
         criteria.and("targetId").is(recipeId);
-        criteria.and("aiStatus").is(AIStatus.APPROVED);
+        criteria.and("aiStatus").is(Status.APPROVED);
         
         // REGRA: Só mostra o review se o autor NÃO for privado
         criteria.and("author.isPrivate").is(false);

@@ -28,5 +28,5 @@ public class Review {
     private List<String> images;
     private Integer rating;
     
-    private AIStatus aiStatus; // Moderação automática
+    private Status aiStatus; // Moderação automática
 }
