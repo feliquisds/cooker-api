@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
@@ -32,8 +33,14 @@ public class DataSeeder implements CommandLineRunner {
     private final RequestRepository requestRepository;
     private final MongoTemplate mongoTemplate;
 
+    @Value("${app.seeder.enabled:false}")
+    private boolean seederEnabled;
+
     @Override
     public void run(String... args) throws Exception {
+        if (!seederEnabled) {
+            return;
+        }
         System.out.println(">>> CONECTADO AO BANCO: " + mongoTemplate.getDb().getName());
         // Limpar banco para teste limpo (opcional)
         userRepository.deleteAll();
