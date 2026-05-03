@@ -99,4 +99,15 @@ public class RecipeService {
 
         return mongoTemplate.aggregate(agg, "recipes", Recipe.class).getMappedResults();
     }
+
+    public List<Recipe> getMyFavoritedRecipes(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        if (user.getFavoriteRecipeIds().isEmpty()) {
+            return List.of();
+        }
+
+        return recipeRepository.findAllById(user.getFavoriteRecipeIds());
+    }
 }

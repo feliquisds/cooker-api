@@ -52,6 +52,12 @@ public class RecipeController {
         return ResponseEntity.ok(recipeService.getRecipeById(id, userId));
     }
 
+    @GetMapping("/favorited")
+    public ResponseEntity<List<Recipe>> getFavorited(Authentication authentication) {
+        String userId = resolveRequiredUserId(authentication);
+        return ResponseEntity.ok(recipeService.getMyFavoritedRecipes(userId));
+    }
+
     private String resolveCurrentUserId(Authentication authentication) {
         if (authentication == null || authentication instanceof AnonymousAuthenticationToken || !authentication.isAuthenticated()) {
             return null;
