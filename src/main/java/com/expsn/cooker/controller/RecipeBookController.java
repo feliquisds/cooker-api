@@ -32,9 +32,9 @@ public class RecipeBookController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<RecipeBook> getBookDetail(@PathVariable String id) {
+    public ResponseEntity<RecipeBook> getBookDetail(@PathVariable String id, @RequestHeader("X-User-ID") String userId) {
         // Aqui a Service deve retornar o livro com os nomes das receitas hidratados
-        return ResponseEntity.ok(recipeBookService.getHydratedBook(id));
+        return ResponseEntity.ok(recipeBookService.getHydratedBook(id, userId));
     }
 
     @GetMapping("/search")

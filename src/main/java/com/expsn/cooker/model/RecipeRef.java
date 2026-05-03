@@ -4,8 +4,10 @@ import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.FieldType;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class RecipeRef extends BookComponent {
     @Field(targetType = FieldType.OBJECT_ID)
     private String recipeId;

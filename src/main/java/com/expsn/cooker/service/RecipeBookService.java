@@ -65,12 +65,14 @@ public class RecipeBookService {
         return mongoTemplate.aggregate(agg, "recipe_books", RecipeBook.class).getMappedResults();
     }
 
-    public RecipeBook getHydratedBook(String id) {
-        // 1. Busca o livro original
+    public RecipeBook getHydratedBook(String id, String userId) {
         RecipeBook book = recipeBookRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Livro não encontrado"));
 
-        // 2. Inicia a recursão para preencher os nomes
+        if (!book.isPublic() && !book.getOwnerId().equals(userId)) {
+            throw new RuntimeException("Acesso negado a este livro");
+        }
+
         hydrateItems(book.getItems());
 
         return book;
