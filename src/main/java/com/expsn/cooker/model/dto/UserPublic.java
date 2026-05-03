@@ -1,11 +1,11 @@
-package com.expsn.cooker.model;
+package com.expsn.cooker.model.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class UserPublicDTO {
+public class UserPublic {
     private String name;
     private String handle;
     private String bio;

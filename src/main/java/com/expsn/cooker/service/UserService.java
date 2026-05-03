@@ -3,7 +3,7 @@ package com.expsn.cooker.service;
 import org.springframework.stereotype.Service;
 
 import com.expsn.cooker.model.User;
-import com.expsn.cooker.model.UserPublicDTO;
+import com.expsn.cooker.model.dto.UserPublic;
 import com.expsn.cooker.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -40,7 +40,7 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public UserPublicDTO getUserProfile(String handle, String currentUserId) {
+    public UserPublic getUserProfile(String handle, String currentUserId) {
         User user = userRepository.findByHandle(handle).orElseThrow(
             () -> new RuntimeException("Usuário não encontrado")
         );
@@ -50,6 +50,6 @@ public class UserService {
             throw new RuntimeException("Este perfil é privado");
         }
         
-        return new UserPublicDTO(user.getName(), user.getHandle(), user.getBio(), user.getAvatarUrl());
+        return new UserPublic(user.getName(), user.getHandle(), user.getBio(), user.getAvatarUrl());
     }
 }

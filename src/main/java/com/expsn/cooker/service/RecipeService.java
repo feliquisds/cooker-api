@@ -11,7 +11,9 @@ import org.springframework.stereotype.Service;
 
 import com.expsn.cooker.model.Difficulty;
 import com.expsn.cooker.model.Recipe;
+import com.expsn.cooker.model.User;
 import com.expsn.cooker.repository.RecipeRepository;
+import com.expsn.cooker.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,11 +22,27 @@ import lombok.RequiredArgsConstructor;
 public class RecipeService {
 
     private final RecipeRepository recipeRepository;
+    private final UserRepository userRepository;
     private final MongoTemplate mongoTemplate;
 
-    public Recipe getRecipeById(String id) {
-        return recipeRepository.findById(id)
+    public Recipe getRecipeById(String id, String userId) {
+        Recipe recipe = recipeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Receita não encontrada"));
+        User author = userRepository.findById(recipe.getAuthorId())
+                .orElseThrow(() -> new RuntimeException("Autor da receita não encontrado"));
+
+        boolean isOwner = userId != null && recipe.getAuthorId().equals(userId);
+
+        // Todas as receitas de usuários privados são tratadas como privadas para terceiros.
+        if (author.isPrivate() && !isOwner) {
+            throw new RuntimeException("Você não tem permissão para visualizar esta receita");
+        }
+
+        if (!recipe.isPublic() && !isOwner) {
+            throw new RuntimeException("Você não tem permissão para visualizar esta receita");
+        }
+
+        return recipe;
     }
 
     public Recipe createRecipe(Recipe recipe, String userId) {
@@ -51,7 +69,7 @@ public class RecipeService {
         return recipeRepository.save(existing);
     }
 
-    public List<Recipe> searchRecipes(String title, List<String> tags, Difficulty diff, String authorHandle) {
+    public List<Recipe> searchRecipes(String title, List<String> tags, Difficulty diff, String authorHandle, String currentUserId) {
         LookupOperation lookupUser = LookupOperation.newLookup()
                 .from("users").localField("authorId").foreignField("_id").as("author");
 
@@ -62,14 +80,21 @@ public class RecipeService {
         if (diff != null) criteria.and("difficulty").is(diff);
         if (authorHandle != null) criteria.and("author.handle").is(authorHandle.replace("@", ""));
 
-        // Regras de Visibilidade Pública
-        criteria.and("isPublic").is(true);          // A receita precisa ser pública
-        criteria.and("author.isPrivate").is(false); // O autor NÃO pode ser privado
+        Criteria visibility = new Criteria();
+        if (currentUserId == null) {
+            visibility = Criteria.where("isPublic").is(true)
+                .and("author.isPrivate").is(false);
+        } else {
+            visibility.orOperator(
+                Criteria.where("authorId").is(currentUserId),
+                Criteria.where("isPublic").is(true).and("author.isPrivate").is(false)
+            );
+        }
 
         Aggregation agg = Aggregation.newAggregation(
                 lookupUser,
                 Aggregation.unwind("author"),
-                Aggregation.match(criteria)
+            Aggregation.match(new Criteria().andOperator(criteria, visibility))
         );
 
         return mongoTemplate.aggregate(agg, "recipes", Recipe.class).getMappedResults();

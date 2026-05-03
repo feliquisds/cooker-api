@@ -2,6 +2,7 @@ package com.expsn.cooker.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -35,9 +36,18 @@ public class RequestService {
         requestRepository.save(request);
     }
 
-    public List<RecipeRequest> getActiveRequests() {
+    public List<RecipeRequest> getActiveRequests(String userId) {
         // Busca apenas o que foi criado nos últimos 30 dias e não foi fechado manualmente
         LocalDateTime limit = LocalDateTime.now().minusDays(30);
-        return requestRepository.findByCreatedAtAfterAndManuallyClosedFalse(limit);
+        List<RecipeRequest> activeRequests = requestRepository.findByCreatedAtAfterAndManuallyClosedFalse(limit);
+
+        // Se o usuário estiver logado
+        if (userId != null) {
+            activeRequests = activeRequests.stream()
+                    .filter(req -> req.getRequesterId().equals(userId))
+                    .collect(Collectors.toList());
+        }
+
+        return activeRequests;
     }
 }
