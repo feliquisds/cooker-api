@@ -60,7 +60,12 @@ public class RecipeService {
         }
 
         existing.setTitle(updatedData.getTitle());
-        existing.setIngredients(updatedData.getIngredients());
+        existing.setDifficulty(updatedData.getDifficulty());
+        existing.setTimeMinutes(updatedData.getTimeMinutes());
+        existing.setImages(updatedData.getImages());
+        existing.setPortions(updatedData.getPortions());
+        existing.setDescriptionMD(updatedData.getDescriptionMD());
+        existing.setIngredientSections(updatedData.getIngredientSections());
         existing.setStepsMD(updatedData.getStepsMD());
         existing.setTags(updatedData.getTags());
         existing.setPublic(updatedData.isPublic());

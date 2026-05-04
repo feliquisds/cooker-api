@@ -31,8 +31,12 @@ public class RecipeBookService {
     private final UserRepository userRepository;
     private final MongoTemplate mongoTemplate;
 
+    private final UserService userService;
+
     public RecipeBook save(RecipeBook book) {
-        return mongoTemplate.save(book);
+        RecipeBook temp = mongoTemplate.save(book);
+        userService.addRecipeBookToSaved(book.getOwnerId(), book.getId());
+        return temp;
     }
     
     public List<RecipeBook> searchBooks(String title, List<String> tags, String authorHandle, String currentUserId) {

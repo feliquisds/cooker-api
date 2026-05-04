@@ -31,7 +31,7 @@ public class Recipe {
     private Integer portions;
     
     private String descriptionMD;
-    private List<Ingredient> ingredients;
+    private List<IngredientSection> ingredientSections;
     private List<String> stepsMD;
     
     private boolean isPublic;

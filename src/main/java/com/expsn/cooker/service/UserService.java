@@ -40,6 +40,26 @@ public class UserService {
         userRepository.save(user);
     }
 
+    public void addRecipeBookToSaved(String userId, String bookId) {
+        User user = userRepository.findById(userId).orElseThrow(
+            () -> new RuntimeException("Usuário não encontrado")
+        );
+        if (!user.getSavedBookIds().contains(bookId)) {
+            user.getSavedBookIds().add(bookId);
+            userRepository.save(user);
+        }
+    }
+
+    public void removeRecipeBookFromSaved(String userId, String bookId) {
+        User user = userRepository.findById(userId).orElseThrow(
+            () -> new RuntimeException("Usuário não encontrado")
+        );
+        if (user.getSavedBookIds().contains(bookId)) {
+            user.getSavedBookIds().remove(bookId);
+            userRepository.save(user);
+        }
+    }
+
     public UserPublic getUserProfile(String handle, String currentUserId) {
         User user = userRepository.findByHandle(handle).orElseThrow(
             () -> new RuntimeException("Usuário não encontrado")

@@ -1,6 +1,6 @@
 package com.expsn.cooker.config;
 
-import java.time.LocalDateTime;
+import java.sql.Date;
 import java.util.List;
 
 import org.springframework.boot.CommandLineRunner;
@@ -11,14 +11,13 @@ import org.springframework.stereotype.Component;
 import com.expsn.cooker.model.Category;
 import com.expsn.cooker.model.Difficulty;
 import com.expsn.cooker.model.Ingredient;
+import com.expsn.cooker.model.IngredientSection;
 import com.expsn.cooker.model.Recipe;
 import com.expsn.cooker.model.RecipeBook;
 import com.expsn.cooker.model.RecipeRef;
-import com.expsn.cooker.model.RecipeRequest;
 import com.expsn.cooker.model.User;
 import com.expsn.cooker.repository.RecipeBookRepository;
 import com.expsn.cooker.repository.RecipeRepository;
-import com.expsn.cooker.repository.RequestRepository;
 import com.expsn.cooker.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -30,7 +29,6 @@ public class DataSeeder implements CommandLineRunner {
     private final UserRepository userRepository;
     private final RecipeRepository recipeRepository;
     private final RecipeBookRepository bookRepository;
-    private final RequestRepository requestRepository;
     private final MongoTemplate mongoTemplate;
 
     @Value("${app.seeder.enabled:false}")
@@ -42,69 +40,64 @@ public class DataSeeder implements CommandLineRunner {
             return;
         }
         System.out.println(">>> CONECTADO AO BANCO: " + mongoTemplate.getDb().getName());
-        // Limpar banco para teste limpo (opcional)
-        userRepository.deleteAll();
-        recipeRepository.deleteAll();
-        bookRepository.deleteAll();
-        requestRepository.deleteAll();
-        // 1. CRIAR USUÁRIOS
-        User chefJoao = User.builder()
-                .handle("cheff_joao")
-                .name("João Silva")
-                .email("joao@cooker.com")
+
+        User rafa = User.builder()
+                .handle("rafafafa")
+                .name("Rafael")
+                .email("rafael@cooker.com")
+                .password("$2a$10$gtpa8C/.4O4ThZHAm6YlsuaWLp8RBJZrBwGrHJIkBRXWxCUuUd7A2")
                 .isPrivate(false)
+                .avatarUrl(null)
+                .bio("Meu nome é Rafa e gosto muito de cozinhar. Apoie o projeto Cooker!")
+                .birthDate(new Date(2002 - 1900, 3 - 1, 5).toLocalDate())
+                .favoriteRecipeIds(null)
+                .notificationTags(null)
+                .savedBookIds(null)
                 .build();
-        userRepository.save(chefJoao);
+        rafa = userRepository.save(rafa);
 
-        User anaSecreta = User.builder()
-                .handle("ana_bio")
-                .name("Ana Souza")
-                .isPrivate(true) // Ana é privada, nada dela deve aparecer na busca global
-                .build();
-        userRepository.save(anaSecreta);
-
-        // 2. CRIAR RECEITA (Do João)
-        Recipe carbonara = Recipe.builder()
-                .authorId(chefJoao.getId())
-                .title("Carbonara Autêntica")
-                .difficulty(Difficulty.MEDIUM)
-                .timeMinutes(25)
+        Recipe temperoVerde = Recipe.builder()
+                .authorId(rafa.getId())
+                .title("Tempero verde")
+                .difficulty(Difficulty.EASY)
+                .timeMinutes(5)
+                .images(null)
                 .isPublic(true)
-                .tags(List.of("#italiana", "#massa"))
-                .ingredients(List.of(
-                        new Ingredient(200.0, "g", "Espaguete"),
-                        new Ingredient(100.0, "g", "Guanciale")
+                .tags(List.of("tempero", "rápida", "vegana"))
+                .descriptionMD("Este tempero é frequentemente usado para marinar carnes na culinária mineira: esta receita é a do restaurante Gosto Com Gosto, um dos meus favoritos em Visconde de Mauá.\n\nEsta receita foi adaptada do livro Interpretações do Gosto, da autora Mônica Rangel.\n\nEquipamento especial: um processador de alimentos.")
+                .ingredientSections(List.of(
+                        IngredientSection.builder()
+                                .title(null)
+                                .ingredients(List.of(
+                                        new Ingredient(2, null, "cebolas"),
+                                        new Ingredient(1, null, "pimentão verde"),
+                                        new Ingredient(5, "dentes", "de alho"),
+                                        new Ingredient(100, "g", "de cheiro verde (salsinha e cebolinha em partes iguais)")
+                                ))
+                                .build()
                 ))
-                .stepsMD(List.of("Ferva a água", "Frite o porco", "Misture o ovo e queijo"))
+                .stepsMD(List.of("Bata todos os ingredientes no processador de alimentos. O tempero dura até 3 dias na geladeira."))
                 .build();
-        recipeRepository.save(carbonara);
+        temperoVerde = recipeRepository.save(temperoVerde);
 
         // 3. CRIAR LIVRO DE RECEITAS (Estrutura Dinâmica/Recursiva)
         // Criando os itens
-        RecipeRef refCarbonara = new RecipeRef();
-        refCarbonara.setRecipeId(carbonara.getId());
-        refCarbonara.setTitle(carbonara.getTitle());
+        RecipeRef refTemperoVerde = new RecipeRef();
+        refTemperoVerde.setRecipeId(temperoVerde.getId());
+        refTemperoVerde.setTitle(temperoVerde.getTitle());
 
-        Category pastaCategory = new Category();
-        pastaCategory.setName("Massas Clássicas");
-        pastaCategory.setItems(List.of(refCarbonara));
+        Category temperosCategory = new Category();
+        temperosCategory.setName("Temperos");
+        temperosCategory.setItems(List.of(refTemperoVerde));
 
         RecipeBook meuLivro = RecipeBook.builder()
-                .ownerId(chefJoao.getId())
-                .title("Segredos da Itália")
+                .ownerId(rafa.getId())
+                .title("Receitas IV")
+                .descriptionMD("Meu objetivo aqui é ensinar que qualquer um (sim, até você!) pode aprender a cozinhar. Todas as receitas nesse site foram testadas e aprovadas por mim, então meticulosamente adaptadas e traduzidas (quando necessário).")
                 .isPublic(true)
-                .items(List.of(pastaCategory)) // O livro tem uma categoria que tem uma receita
+                .items(List.of(temperosCategory))
                 .build();
         bookRepository.save(meuLivro);
-
-        // 4. CRIAR REQUEST (Da Ana)
-        RecipeRequest req = RecipeRequest.builder()
-                .requesterId(anaSecreta.getId())
-                .title("Sugestão de Bolo Diet")
-                .tags(List.of("#doce", "#diet"))
-                .createdAt(LocalDateTime.now())
-                .build();
-        requestRepository.save(req);
 
         System.out.println(">>> Banco de Dados COOKER populado com sucesso! <<<");
     }
