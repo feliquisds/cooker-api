@@ -109,7 +109,7 @@ public class RecipeService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-        if (user.getFavoriteRecipeIds().isEmpty()) {
+        if (user.getFavoriteRecipeIds() == null || user.getFavoriteRecipeIds().isEmpty()) {
             return List.of();
         }
 

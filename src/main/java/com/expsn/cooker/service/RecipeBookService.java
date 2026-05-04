@@ -38,6 +38,33 @@ public class RecipeBookService {
         userService.addRecipeBookToSaved(book.getOwnerId(), book.getId());
         return temp;
     }
+
+    public List<RecipeBook> getSavedBooks(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        if (user.getFavoriteRecipeIds() == null || user.getFavoriteRecipeIds().isEmpty()) {
+            return List.of();
+        }
+
+        return recipeBookRepository.findAllById(user.getFavoriteRecipeIds()).stream()
+                .filter(book -> {
+                    User owner = userRepository.findById(book.getOwnerId())
+                            .orElseThrow(() -> new RuntimeException("Dono do livro não encontrado"));
+                    boolean isOwner = book.getOwnerId().equals(userId);
+
+                    if (owner.isPrivate() && !isOwner) {
+                        return false;
+                    }
+
+                    if (!book.isPublic() && !isOwner) {
+                        return false;
+                    }
+
+                    return true;
+                })
+                .toList();
+    }
     
     public List<RecipeBook> searchBooks(String title, List<String> tags, String authorHandle, String currentUserId) {
         // 1. Cruza com a coleção de usuários para checar privacidade e handle

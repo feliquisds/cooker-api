@@ -52,6 +52,12 @@ public class RecipeBookController {
         return ResponseEntity.ok(recipeBookService.searchBooks(title, tags, authorHandle, resolveCurrentUserId(authentication)));
     }
 
+    @GetMapping("/saved")
+    public ResponseEntity<List<RecipeBook>> getSavedBooks(Authentication authentication) {
+        String userId = resolveRequiredUserId(authentication);
+        return ResponseEntity.ok(recipeBookService.getSavedBooks(userId));
+    }
+
     private String resolveCurrentUserId(Authentication authentication) {
         if (authentication == null || authentication instanceof AnonymousAuthenticationToken || !authentication.isAuthenticated()) {
             return null;
