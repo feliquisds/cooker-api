@@ -43,11 +43,11 @@ public class RecipeBookService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-        if (user.getFavoriteRecipeIds() == null || user.getFavoriteRecipeIds().isEmpty()) {
+        if (user.getSavedBookIds() == null || user.getSavedBookIds().isEmpty()) {
             return List.of();
         }
 
-        return recipeBookRepository.findAllById(user.getFavoriteRecipeIds()).stream()
+        return recipeBookRepository.findAllById(user.getSavedBookIds()).stream()
                 .filter(book -> {
                     User owner = userRepository.findById(book.getOwnerId())
                             .orElseThrow(() -> new RuntimeException("Dono do livro não encontrado"));

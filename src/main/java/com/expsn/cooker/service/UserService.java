@@ -72,4 +72,17 @@ public class UserService {
         
         return new UserPublic(user.getName(), user.getHandle(), user.getBio(), user.getAvatarUrl());
     }
+
+    public UserPublic getUserProfileById(String id, String currentUserId) {
+        User user = userRepository.findById(id).orElseThrow(
+            () -> new RuntimeException("Usuário não encontrado")
+        );
+        
+        // Se o usuário for privado e não for o próprio dono vendo
+        if (user.isPrivate() && !user.getId().equals(currentUserId)) {
+            throw new RuntimeException("Este perfil é privado");
+        }
+        
+        return new UserPublic(user.getName(), user.getHandle(), user.getBio(), user.getAvatarUrl());
+    }
 }

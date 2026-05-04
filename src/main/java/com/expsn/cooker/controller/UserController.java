@@ -32,6 +32,14 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserProfile(handle, currentUserId));
     }
 
+    @GetMapping("/profile/id/{id}")
+    public ResponseEntity<UserPublic> getPublicProfileById(
+            @PathVariable String id,
+            Authentication authentication) {
+        String currentUserId = resolveCurrentUserId(authentication); 
+        return ResponseEntity.ok(userService.getUserProfileById(id, currentUserId));
+    }
+
     // requires logged user
     @GetMapping("/me")
     public ResponseEntity<User> getMyProfile(Authentication authentication) {
