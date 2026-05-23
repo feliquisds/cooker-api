@@ -3,10 +3,10 @@ package com.expsn.cooker.util;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 
-public final class ControllerAuthUtils {
+import lombok.experimental.UtilityClass;
 
-    private ControllerAuthUtils() {
-    }
+@UtilityClass
+public final class ControllerAuthUtils {
 
     public static String resolveCurrentUserId(Authentication authentication) {
         if (authentication == null || authentication instanceof AnonymousAuthenticationToken || !authentication.isAuthenticated()) {
