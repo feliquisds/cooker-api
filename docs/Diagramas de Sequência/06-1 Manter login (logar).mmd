@@ -1,0 +1,31 @@
+---
+config:
+    mirrorActors: false
+---
+
+sequenceDiagram
+    actor U as Usuário
+    participant F as Frontend
+    participant C as AuthController
+    participant S as AuthService
+    participant A as AuthenticationManager
+    participant R as UserRepository
+
+    U->>+F: Realizar login
+    F->>+C: POST /api/auth/login {LoginRequest}
+    C->>+S: login(LoginRequest loginRequest)
+    S->>+A: authenticate(String email, String password)
+
+    alt Credenciais inválidas
+        A-->>S: Exception
+        S-->>C: BusinessException
+        C-->>F: HTTP 412
+        F-->>U: Credenciais inválidas
+    end
+
+    A-->>-S: Authentication
+    S->>+R: findByEmail(String email)
+    R-->>-S: User
+    S-->>-C: AuthResponse
+    C-->>-F: HTTP 200
+    F-->>-U: Usuário logado

@@ -32,21 +32,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String jwt = getJwtFromRequest(request);
 
             if (jwt != null && tokenProvider.validateToken(jwt)) {
-            String userId = tokenProvider.getUserIdFromToken(jwt);
-            User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + userId));
+                String userId = tokenProvider.getUserIdFromToken(jwt);
+                User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + userId));
 
-            UserDetails userDetails = org.springframework.security.core.userdetails.User
-                .withUsername(user.getId())
-                .password(user.getPassword())
-                .authorities(Collections.emptyList())
-                .build();
+                UserDetails userDetails = org.springframework.security.core.userdetails.User
+                    .withUsername(user.getId())
+                    .password(user.getPassword())
+                    .authorities(Collections.emptyList())
+                    .build();
 
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, Collections.emptyList());
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, Collections.emptyList());
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (Exception ex) {
             logger.error("Could not set user authentication in security context", ex);

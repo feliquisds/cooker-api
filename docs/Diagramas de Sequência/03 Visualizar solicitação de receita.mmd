@@ -1,0 +1,44 @@
+---
+config:
+    mirrorActors: false
+---
+
+sequenceDiagram
+    actor U as Usuário
+    participant F as Frontend
+    participant C as RequestController
+    participant S as RequestService
+    participant R as RequestRepository
+
+    U->>+F: Visualizar solicitação
+    F->>+C: GET /api/requests/{id} {Token}
+
+    alt Usuário não autenticado
+        C->>C: userId = null
+    end
+
+    C->>+S: getRequestById(String id, String userId)
+    S->>+R: findById(String id)
+    R-->>-S: Request
+
+    alt Solicitação não encontrada
+        S-->>C: ItemException
+        C-->>F: HTTP 412
+        F-->>U: Solicitação não encontrada
+    end
+
+    S->>S: filter()
+    Note right of S: Filtro de privacidade
+    %% Somente visível caso:
+    %% - O usuário é o próprio dono da solicitação
+    %% - O usuário é público
+
+    alt Usuário sem permissão
+        S-->>C: BusinessException
+        C-->>F: HTTP 403
+        F-->>U: Acesso negado
+    end
+
+    S-->>-C: Request
+    C-->>-F: HTTP 200
+    F-->>-U: Informações da solicitação

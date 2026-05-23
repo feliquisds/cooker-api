@@ -1,0 +1,30 @@
+RF01 – O sistema deve permitir manter (criar, atualizar, visualizar, logar) usuários
+RF02 – O sistema deve permitir manter (criar, atualizar, visualizar, apagar) receitas
+RF03 – O sistema deve permitir manter (criar, atualizar, visualizar, apagar) textos
+RF04 – O sistema deve permitir manter (criar, atualizar, visualizar, apagar) livros de receitas
+RF05 – O sistema deve permitir favoritar itens (receitas, textos, livros)
+RF06 – O sistema deve permitir exportar receitas/textos em PDF
+RF07 – O sistema deve permitir criação de reviews
+RF08 – O sistema deve permitir manter (criar, responder) solicitações de receitas
+RF09 – O sistema deve permitir pesquisa com filtros de itens (usuários, receitas, textos, livros, solicitações)
+RF10 – O sistema deve permitir configurar privacidade do conteúdo (usuário, receitas, textos, livros)
+RF11 – O sistema deve enviar notificações por email
+
+RNF01 – O sistema deve ser multiplataforma (web e mobile)
+RNF02 – O sistema deve garantir segurança dos dados (criptografia de senha)
+RNF03 – O sistema deve ter alta disponibilidade
+RNF04 – O sistema deve ter tempo de resposta inferior a 2 segundos
+RNF05 – O sistema deve ser escalável (arquitetura de microsserviços)
+RNF06 – O sistema deve ser responsivo (UI adaptável)
+RNF07 – O sistema deve oferecer tema claro, escuro e automático
+
+RN01 – Apenas o criador pode editar seus conteúdos
+RN02 – Usuários sem conta não podem criar conteúdo
+RN03 – Conteúdos privados só são visíveis ao dono
+RN04 – Contas privadas tornam todo conteúdo privado
+RN05 – Receitas públicas podem ser exportadas com QR Code (aponta ao URL)
+RN06 – Livros de receita privados tornam todas as receitas em si privadas
+RN07 – Todos os reviews de receitas privadas são visíveis somente ao dono da receita
+RN08 – Usuários podem visualizar todos os reviews que fizeram, mas receitas privadas não são mais acessáveis
+RN09 – Usuários podem receber notificações de receitas novas/em trend com base em tags
+RN10 – Usuários podem receber notificações de requisições com base em tags

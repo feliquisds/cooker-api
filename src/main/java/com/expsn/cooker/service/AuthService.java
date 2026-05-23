@@ -26,17 +26,14 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
 
     public AuthResponse register(RegisterRequest request) {
-        // Check if email already exists
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new RuntimeException("Email is already registered");
         }
 
-        // Check if handle already exists
         if (userRepository.findByHandle(request.getHandle()).isPresent()) {
             throw new RuntimeException("Handle is already taken");
         }
 
-        // Create new user
         User user = User.builder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
@@ -50,44 +47,36 @@ public class AuthService {
 
         User savedUser = userRepository.save(user);
 
-        // Generate token
-        String token = jwtTokenProvider.generateTokenFromUserId(savedUser.getId());
-
-        return AuthResponse.builder()
-                .token(token)
-                .email(savedUser.getEmail())
-                .name(savedUser.getName())
-                .userId(savedUser.getId())
-                .build();
+        authenticate(request.getEmail(), request.getPassword());
+        return buildAuthResponse(savedUser);
     }
 
     public AuthResponse login(LoginRequest request) {
         try {
-            // Authenticate using the provided email and password
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            request.getEmail(),
-                            request.getPassword()
-                    )
-            );
+            Authentication authentication = authenticate(request.getEmail(), request.getPassword());
+            String email = authentication.getName();
+            User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-            // Get the authenticated user
-                String email = authentication.getName();
-                User user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-
-            // Generate token
-                String token = jwtTokenProvider.generateTokenFromUserId(user.getId());
-
-            return AuthResponse.builder()
-                    .token(token)
-                    .email(user.getEmail())
-                    .name(user.getName())
-                    .userId(user.getId())
-                    .build();
+            return buildAuthResponse(user);
 
         } catch (AuthenticationException e) {
-            throw new RuntimeException("Invalid email or password");
+            throw new RuntimeException("Email ou senha inválidos");
         }
+    }
+
+    private Authentication authenticate(String email, String password) {
+        return authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(email, password)
+        );
+    }
+
+    private AuthResponse buildAuthResponse(User user) {
+        return AuthResponse.builder()
+                .token(jwtTokenProvider.generateTokenFromUserId(user.getId()))
+                .email(user.getEmail())
+                .name(user.getName())
+                .userId(user.getId())
+                .build();
     }
 }

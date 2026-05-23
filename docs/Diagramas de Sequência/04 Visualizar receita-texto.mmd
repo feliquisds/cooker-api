@@ -1,0 +1,46 @@
+---
+config:
+    mirrorActors: false
+---
+
+sequenceDiagram
+    actor U as Usuário
+    participant F as Frontend
+    participant C as RecipeController
+    participant S as RecipeService
+    participant R as RecipeRepository
+
+    U->>+F: Visualizar receita
+    F->>+C: GET /api/recipes/{id} {Token}
+
+    alt Usuário não autenticado
+        C->>C: userId = null
+    end
+
+    C->>+S: getRecipeById(String id, String userId)
+    S->>+R: findById(String id)
+    R-->>-S: Recipe
+
+    alt Receita não encontrada
+        S-->>C: ItemException
+        C-->>F: HTTP 412
+        F-->>U: Receita não encontrada
+    end
+
+    S->>S: filter()
+    Note right of S: Filtro de privacidade
+    %% Somente visível caso:
+    %% - O usuário é o próprio dono da receita
+    %% - O usuário é público
+    %% - A receita é pública
+    %% - O livro de receita em que a receita está é público
+
+    alt Usuário sem permissão
+        S-->>C: BusinessException
+        C-->>F: HTTP 403
+        F-->>U: Acesso negado
+    end
+
+    S-->>-C: Recipe
+    C-->>-F: HTTP 200
+    F-->>-U: Informações da receita

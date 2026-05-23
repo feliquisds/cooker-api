@@ -1,0 +1,38 @@
+---
+config:
+    mirrorActors: false
+---
+
+sequenceDiagram
+    actor U as Usuário
+    participant F as Frontend
+    participant C as AuthController
+    participant S as AuthService
+    participant R as UserRepository
+    participant A as AuthenticationManager
+
+    U->>+F: Criar conta
+    F->>+C: POST /api/auth/register {RegisterRequest}
+    C->>+S: register(RegisterRequest registerRequest)
+
+    S->>+R: findByEmail(String email)
+    R-->>-S: User
+    alt Email existe
+        S-->>C: BusinessException
+        C-->>F: HTTP 400
+        F-->>U: Email já cadastrado
+    end
+
+    S->>+R: findByHandle(String handle)
+    R-->>-S: User
+    alt Nome de usuário existe
+        S-->>C: BusinessException
+        C-->>F: HTTP 400
+        F-->>U: Nome de usuário já cadastrado
+    end
+
+    S->>+A: authenticate(String email, String password)
+    A-->>-S: Authentication
+    S-->>-C: AuthResponse
+    C-->>-F: HTTP 201
+    F-->>-U: Usuário criado

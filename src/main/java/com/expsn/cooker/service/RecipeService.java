@@ -1,6 +1,7 @@
 package com.expsn.cooker.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -31,14 +32,7 @@ public class RecipeService {
         User author = userRepository.findById(recipe.getAuthorId())
                 .orElseThrow(() -> new RuntimeException("Autor da receita não encontrado"));
 
-        boolean isOwner = userId != null && recipe.getAuthorId().equals(userId);
-
-        // Todas as receitas de usuários privados são tratadas como privadas para terceiros.
-        if (author.isPrivate() && !isOwner) {
-            throw new RuntimeException("Você não tem permissão para visualizar esta receita");
-        }
-
-        if (!recipe.isPublic() && !isOwner) {
+        if (!canViewRecipe(recipe, author, userId)) {
             throw new RuntimeException("Você não tem permissão para visualizar esta receita");
         }
 
@@ -55,7 +49,7 @@ public class RecipeService {
         Recipe existing = recipeRepository.findById(recipeId)
                 .orElseThrow(() -> new RuntimeException("Receita não encontrada"));
 
-        if (!existing.getAuthorId().equals(userId)) {
+        if (!isOwner(existing.getAuthorId(), userId)) {
             throw new RuntimeException("Você não tem permissão para editar esta receita");
         }
 
@@ -78,28 +72,30 @@ public class RecipeService {
         LookupOperation lookupUser = LookupOperation.newLookup()
                 .from("users").localField("authorId").foreignField("_id").as("author");
 
-        Criteria criteria = new Criteria();
-        
-        if (title != null) criteria.and("title").regex(title, "i");
-        if (tags != null) criteria.and("tags").all(tags);
-        if (diff != null) criteria.and("difficulty").is(diff);
-        if (authorHandle != null) criteria.and("author.handle").is(authorHandle.replace("@", ""));
-
-        Criteria visibility = new Criteria();
-        if (currentUserId == null) {
-            visibility = Criteria.where("isPublic").is(true)
-                .and("author.isPrivate").is(false);
-        } else {
-            visibility.orOperator(
-                Criteria.where("authorId").is(currentUserId),
-                Criteria.where("isPublic").is(true).and("author.isPrivate").is(false)
-            );
+        List<Criteria> criteriaList = new ArrayList<>();
+        if (title != null && !title.isBlank()) {
+            criteriaList.add(Criteria.where("title").regex(title, "i"));
         }
+        if (tags != null && !tags.isEmpty()) {
+            criteriaList.add(Criteria.where("tags").all(tags));
+        }
+        if (diff != null) {
+            criteriaList.add(Criteria.where("difficulty").is(diff));
+        }
+        if (authorHandle != null && !authorHandle.isBlank()) {
+            criteriaList.add(Criteria.where("author.handle").is(normalizeHandle(authorHandle)));
+        }
+
+        criteriaList.add(buildVisibilityCriteria(currentUserId));
+
+        Criteria matchCriteria = criteriaList.size() == 1
+                ? criteriaList.get(0)
+                : new Criteria().andOperator(criteriaList.toArray(new Criteria[0]));
 
         Aggregation agg = Aggregation.newAggregation(
                 lookupUser,
                 Aggregation.unwind("author"),
-            Aggregation.match(new Criteria().andOperator(criteria, visibility))
+                Aggregation.match(matchCriteria)
         );
 
         return mongoTemplate.aggregate(agg, "recipes", Recipe.class).getMappedResults();
@@ -113,6 +109,40 @@ public class RecipeService {
             return List.of();
         }
 
-        return recipeRepository.findAllById(user.getFavoriteRecipeIds());
+        return recipeRepository.findAllById(user.getFavoriteRecipeIds()).stream()
+                .filter(recipe -> {
+                    User author = userRepository.findById(recipe.getAuthorId())
+                            .orElseThrow(() -> new RuntimeException("Autor da receita não encontrado"));
+                    return canViewRecipe(recipe, author, userId);
+                })
+                .toList();
+    }
+
+    private boolean canViewRecipe(Recipe recipe, User author, String userId) {
+        if (isOwner(recipe.getAuthorId(), userId)) {
+            return true;
+        }
+
+        return recipe.isPublic() && !author.isPrivate();
+    }
+
+    private Criteria buildVisibilityCriteria(String currentUserId) {
+        if (currentUserId == null) {
+            return Criteria.where("isPublic").is(true)
+                    .and("author.isPrivate").is(false);
+        }
+
+        return new Criteria().orOperator(
+                Criteria.where("authorId").is(currentUserId),
+                Criteria.where("isPublic").is(true).and("author.isPrivate").is(false)
+        );
+    }
+
+    private boolean isOwner(String ownerId, String userId) {
+        return userId != null && ownerId.equals(userId);
+    }
+
+    private String normalizeHandle(String handle) {
+        return handle.replace("@", "").trim();
     }
 }

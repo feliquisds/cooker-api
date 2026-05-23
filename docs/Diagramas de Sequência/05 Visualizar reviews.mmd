@@ -1,0 +1,40 @@
+---
+config:
+    mirrorActors: false
+---
+
+sequenceDiagram
+    actor U as Usuário
+    participant F as Frontend
+    participant C as RecipeController
+    participant S as ReviewService
+    participant R as ReviewRepository
+
+    U->>+F: Visualizar reviews
+    F->>+C: GET /api/recipes/{id}/reviews {Token}
+
+    alt Usuário não autenticado
+        C->>C: userId = null
+    end
+
+    C->>+S: getReviewsByRecipeId(String id, String userId)
+    S->>+R: findAllByTargetIdAndStatus(String id, Status status)
+    R-->>-S: List<Review>
+
+    S->>S: filter()
+    Note right of S: Filtro de privacidade
+    %% Somente visível caso:
+    %% - O usuário é o próprio dono da receita
+    %% - O usuário é público
+    %% - A receita é pública
+    %% - O livro de receita em que a receita está é público
+
+    alt Usuário sem permissão
+        S-->>C: BusinessException
+        C-->>F: HTTP 403
+        F-->>U: Acesso negado
+    end
+
+    S-->>-C: List<Review>
+    C-->>-F: HTTP 200
+    F-->>-U: Reviews da receita

@@ -48,24 +48,16 @@ public class ReviewService {
                 .orElseThrow(() -> new RuntimeException("Receita não encontrada"));
         User recipeAuthor = userRepository.findById(recipe.getAuthorId())
                 .orElseThrow(() -> new RuntimeException("Autor da receita não encontrado"));
-        boolean isRecipeOwner = currentUserId != null && recipe.getAuthorId().equals(currentUserId);
-        boolean isRecipeVisibleToCurrentUser = recipe.isPublic() && !recipeAuthor.isPrivate();
 
-        // Receita só é pública para terceiros se ela for pública e o autor não for privado.
-        if (isRecipeVisibleToCurrentUser) {
+        if (isRecipePubliclyVisible(recipe, recipeAuthor)) {
             return reviewRepository.findByTargetIdAndAiStatus(recipeId, Status.APPROVED);
         }
 
-        // Se a receita não estiver visível publicamente:
-        if (currentUserId == null) throw new RuntimeException("Acesso negado a esta receita");
-
-        // Se o usuário logado for o dono da receita, ele vê todos os reviews nela.
-        if (isRecipeOwner) {
+        if (currentUserId != null && currentUserId.equals(recipe.getAuthorId())) {
             return reviewRepository.findByTargetIdAndAiStatus(recipeId, Status.APPROVED);
         }
 
-        // Caso contrário, o usuário logado só vê o PRÓPRIO review (se ele tiver feito um)
-        return reviewRepository.findByTargetIdAndAuthorId(recipeId, currentUserId);
+        throw new RuntimeException("Acesso negado a esta receita");
     }
 
     public List<Review> getReviewsFromUser(String userId) {
@@ -78,8 +70,7 @@ public class ReviewService {
         User recipeAuthor = userRepository.findById(recipe.getAuthorId())
             .orElseThrow(() -> new RuntimeException("Autor da receita não encontrado"));
 
-        // Endpoint público: conteúdo de usuário privado nunca aparece.
-        if (!recipe.isPublic() || recipeAuthor.isPrivate()) {
+        if (!isRecipePubliclyVisible(recipe, recipeAuthor)) {
             return Collections.emptyList();
         }
 
@@ -101,5 +92,9 @@ public class ReviewService {
         );
 
         return mongoTemplate.aggregate(agg, "reviews", Review.class).getMappedResults();
+    }
+
+    private boolean isRecipePubliclyVisible(Recipe recipe, User author) {
+        return recipe.isPublic() && !author.isPrivate();
     }
 }

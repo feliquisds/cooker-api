@@ -1,0 +1,26 @@
+---
+config:
+    mirrorActors: false
+---
+
+sequenceDiagram
+    actor U as Usuário
+    participant F as Frontend
+    participant C as UserController
+    participant S as ReviewService
+    participant R as ReviewRepository
+
+    U->>+F: Visualizar meus reviews
+    F->>+C: GET /api/users/me/reviews {Token}
+
+    alt Usuário não autenticado
+        C-->>F: HTTP 403
+        F-->>U: Usuário não autenticado
+    end
+
+    C->>+S: getReviewsByUserId(String userId)
+    S->>+R: findAllByAuthorIdAndStatus(String authorId, Status status)
+    R-->>-S: List<Review>
+    S-->>-C: List<Review>
+    C-->>-F: HTTP 200
+    F-->>-U: Reviews do usuário

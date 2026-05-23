@@ -34,9 +34,9 @@ public class RecipeBookService {
     private final UserService userService;
 
     public RecipeBook save(RecipeBook book) {
-        RecipeBook temp = mongoTemplate.save(book);
-        userService.addRecipeBookToSaved(book.getOwnerId(), book.getId());
-        return temp;
+        RecipeBook savedBook = mongoTemplate.save(book);
+        userService.addRecipeBookToSaved(savedBook.getOwnerId(), savedBook.getId());
+        return savedBook;
     }
 
     public List<RecipeBook> getSavedBooks(String userId) {
@@ -48,21 +48,7 @@ public class RecipeBookService {
         }
 
         return recipeBookRepository.findAllById(user.getSavedBookIds()).stream()
-                .filter(book -> {
-                    User owner = userRepository.findById(book.getOwnerId())
-                            .orElseThrow(() -> new RuntimeException("Dono do livro não encontrado"));
-                    boolean isOwner = book.getOwnerId().equals(userId);
-
-                    if (owner.isPrivate() && !isOwner) {
-                        return false;
-                    }
-
-                    if (!book.isPublic() && !isOwner) {
-                        return false;
-                    }
-
-                    return true;
-                })
+                .filter(book -> canViewBook(book, userId))
                 .toList();
     }
     
@@ -74,50 +60,39 @@ public class RecipeBookService {
                 .foreignField("_id")
                 .as("authorData");
 
-        Criteria criteria = new Criteria();
-
-        // Filtros de conteúdo do livro
-        if (title != null) criteria.and("title").regex(title, "i");
-        if (tags != null && !tags.isEmpty()) criteria.and("tags").all(tags);
-
-        // Filtro pelo Handle do Autor
-        if (authorHandle != null) {
-            criteria.and("authorData.handle").is(authorHandle.replace("@", ""));
+        List<Criteria> criteriaList = new java.util.ArrayList<>();
+        if (title != null && !title.isBlank()) {
+            criteriaList.add(Criteria.where("title").regex(title, "i"));
+        }
+        if (tags != null && !tags.isEmpty()) {
+            criteriaList.add(Criteria.where("tags").all(tags));
+        }
+        if (authorHandle != null && !authorHandle.isBlank()) {
+            criteriaList.add(Criteria.where("authorData.handle").is(normalizeHandle(authorHandle)));
         }
 
-        Criteria visibility = new Criteria();
-        if (currentUserId == null) {
-            visibility = Criteria.where("isPublic").is(true)
-                .and("authorData.isPrivate").is(false);
-        } else {
-            visibility.orOperator(
-                Criteria.where("ownerId").is(currentUserId),
-                Criteria.where("isPublic").is(true).and("authorData.isPrivate").is(false)
-            );
-        }
+        criteriaList.add(buildVisibilityCriteria(currentUserId));
+
+        Criteria matchCriteria = criteriaList.size() == 1
+                ? criteriaList.get(0)
+                : new Criteria().andOperator(criteriaList.toArray(new Criteria[0]));
 
         Aggregation agg = Aggregation.newAggregation(
                 lookupUser,
                 Aggregation.unwind("authorData"),
-            Aggregation.match(new Criteria().andOperator(criteria, visibility))
+                Aggregation.match(matchCriteria)
         );
 
         return mongoTemplate.aggregate(agg, "recipe_books", RecipeBook.class).getMappedResults();
     }
 
-    public RecipeBook getHydratedBook(String id, String userId) {
+    public RecipeBook getBookById(String id, String userId) {
         RecipeBook book = recipeBookRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Livro não encontrado"));
         User owner = userRepository.findById(book.getOwnerId())
                 .orElseThrow(() -> new RuntimeException("Dono do livro não encontrado"));
-        boolean isOwner = userId != null && book.getOwnerId().equals(userId);
 
-        // Todos os livros de usuários privados são tratados como privados para terceiros.
-        if (owner.isPrivate() && !isOwner) {
-            throw new RuntimeException("Acesso negado a este livro");
-        }
-
-        if (!book.isPublic() && !isOwner) {
+        if (!canViewBook(book, owner, userId)) {
             throw new RuntimeException("Acesso negado a este livro");
         }
 
@@ -146,5 +121,37 @@ public class RecipeBookService {
                 hydrateItems(cat.getItems());
             }
         }
+    }
+
+    private boolean canViewBook(RecipeBook book, String userId) {
+        User owner = userRepository.findById(book.getOwnerId())
+                .orElseThrow(() -> new RuntimeException("Dono do livro não encontrado"));
+
+        return canViewBook(book, owner, userId);
+    }
+
+    private boolean canViewBook(RecipeBook book, User owner, String userId) {
+        boolean isOwner = userId != null && book.getOwnerId().equals(userId);
+        if (isOwner) {
+            return true;
+        }
+
+        return book.isPublic() && !owner.isPrivate();
+    }
+
+    private Criteria buildVisibilityCriteria(String currentUserId) {
+        if (currentUserId == null) {
+            return Criteria.where("isPublic").is(true)
+                    .and("authorData.isPrivate").is(false);
+        }
+
+        return new Criteria().orOperator(
+                Criteria.where("ownerId").is(currentUserId),
+                Criteria.where("isPublic").is(true).and("authorData.isPrivate").is(false)
+        );
+    }
+
+    private String normalizeHandle(String handle) {
+        return handle.replace("@", "").trim();
     }
 }

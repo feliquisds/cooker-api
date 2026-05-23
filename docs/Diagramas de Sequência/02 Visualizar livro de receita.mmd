@@ -1,0 +1,45 @@
+---
+config:
+    mirrorActors: false
+---
+
+sequenceDiagram
+    actor U as Usuário
+    participant F as Frontend
+    participant C as RecipeBookController
+    participant S as RecipeBookService
+    participant R as RecipeBookRepository
+
+    U->>+F: Visualizar livro de receita
+    F->>+C: GET /api/books/{id} {Token}
+
+    alt Usuário não autenticado
+        C->>C: userId = null
+    end
+
+    C->>+S: getBookById(String id, String userId)
+    S->>+R: findById(String id)
+    R-->>-S: RecipeBook
+
+    alt Livro não encontrado
+        S-->>C: ItemException
+        C-->>F: HTTP 412
+        F-->>U: Livro de receita não encontrado
+    end
+
+    S->>S: filter()
+    Note right of S: Filtro de privacidade
+    %% Somente visível caso:
+    %% - O usuário é o próprio dono do livro de receita
+    %% - O usuário é público
+    %% - O livro de receita é público
+
+    alt Usuário sem permissão
+        S-->>C: BusinessException
+        C-->>F: HTTP 403
+        F-->>U: Acesso negado
+    end
+
+    S-->>-C: RecipeBook
+    C-->>-F: HTTP 200
+    F-->>-U: Informações do livro de receita

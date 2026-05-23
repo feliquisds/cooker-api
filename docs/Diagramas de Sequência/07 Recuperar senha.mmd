@@ -1,0 +1,30 @@
+---
+config:
+    mirrorActors: false
+---
+
+sequenceDiagram
+    actor U as Usuário
+    participant F as Frontend
+    participant C as AuthController
+    participant S as AuthService
+    participant R as UserRepository
+    participant E as EmailClient
+
+    U->>+F: Recuperar senha
+    F->>+C: POST /api/auth/recover {String email}
+    C->>+S: recover(String email)
+
+    S->>+R: findByEmail(String email)
+    R-->>-S: User
+    alt Email não existe
+        S-->>C: BusinessException
+        C-->>F: HTTP 400
+        F-->>U: Email não existe
+    end
+
+    S->>+E: sendRecoveryEmail(String email)
+    E-->>-S: void
+    S-->>-C: void
+    C-->>-F: HTTP 200
+    F-->>-U: Email de recuperação enviado

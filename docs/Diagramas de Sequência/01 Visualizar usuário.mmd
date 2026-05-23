@@ -1,0 +1,44 @@
+---
+config:
+    mirrorActors: false
+---
+
+sequenceDiagram
+    actor U as Usuário
+    participant F as Frontend
+    participant C as UserController
+    participant S as UserService
+    participant R as UserRepository
+
+    U->>+F: Visualizar usuário
+    F->>+C: GET /api/users/{id} {Token}
+
+    alt Usuário não autenticado
+        C->>C: userId = null
+    end
+
+    C->>+S: getUserById(String id, String userId)
+    S->>+R: findById(String id)
+    R-->>-S: PublicUserDTO
+
+    alt Usuário não encontrado
+        S-->>C: ItemException
+        C-->>F: HTTP 412
+        F-->>U: Usuário não encontrado
+    end
+
+    S->>S: filter()
+    Note right of S: Filtro de privacidade
+    %% Somente visível caso:
+    %% - O usuário é o próprio dono do perfil
+    %% - O usuário é público
+
+    alt Usuário sem permissão
+        S-->>C: BusinessException
+        C-->>F: HTTP 403
+        F-->>U: Acesso negado
+    end
+
+    S-->>-C: UserPublicDTO
+    C-->>-F: HTTP 200
+    F-->>-U: Informações públicas do usuário
