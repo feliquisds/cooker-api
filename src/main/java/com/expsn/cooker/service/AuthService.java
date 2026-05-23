@@ -1,6 +1,7 @@
 package com.expsn.cooker.service;
 
 import com.expsn.cooker.exception.BusinessException;
+import com.expsn.cooker.exception.ItemException;
 import com.expsn.cooker.model.User;
 import com.expsn.cooker.model.dto.AuthResponse;
 import com.expsn.cooker.model.dto.LoginRequest;
@@ -58,7 +59,7 @@ public class AuthService {
             Authentication authentication = authenticate(request.getEmail(), request.getPassword());
             String email = authentication.getName();
             User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new ItemException("Usuário não encontrado"));
 
             return buildAuthResponse(user);
 

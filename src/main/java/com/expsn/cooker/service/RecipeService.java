@@ -105,7 +105,7 @@ public class RecipeService {
 
     public List<Recipe> getMyFavoritedRecipes(String userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new ItemException("Usuário não encontrado"));
 
         if (user.getFavoriteRecipeIds() == null || user.getFavoriteRecipeIds().isEmpty()) {
             return List.of();
@@ -114,7 +114,7 @@ public class RecipeService {
         return recipeRepository.findAllById(user.getFavoriteRecipeIds()).stream()
                 .filter(recipe -> {
                     User author = userRepository.findById(recipe.getAuthorId())
-                            .orElseThrow(() -> new RuntimeException("Autor da receita não encontrado"));
+                            .orElseThrow(() -> new ItemException("Autor da receita não encontrado"));
                     return canViewRecipe(recipe, author, userId);
                 })
                 .toList();

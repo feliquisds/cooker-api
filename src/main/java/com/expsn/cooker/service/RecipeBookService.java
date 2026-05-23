@@ -43,7 +43,7 @@ public class RecipeBookService {
 
     public List<RecipeBook> getSavedBooks(String userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new ItemException("Usuário não encontrado"));
 
         if (user.getSavedBookIds() == null || user.getSavedBookIds().isEmpty()) {
             return List.of();
@@ -127,7 +127,7 @@ public class RecipeBookService {
 
     private boolean canViewBook(RecipeBook book, String userId) {
         User owner = userRepository.findById(book.getOwnerId())
-                .orElseThrow(() -> new RuntimeException("Dono do livro não encontrado"));
+                .orElseThrow(() -> new ItemException("Dono do livro não encontrado"));
 
         return canViewBook(book, owner, userId);
     }
