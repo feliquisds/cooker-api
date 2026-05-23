@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.expsn.cooker.exception.ItemException;
+import com.expsn.cooker.exception.CookerException;
 import com.expsn.cooker.model.RecipeRequest;
 import com.expsn.cooker.model.RecipeRequestResponse;
 import com.expsn.cooker.repository.RequestRepository;
@@ -32,7 +32,7 @@ public class RequestService {
 
     public void respondToRequest(String requestId, RecipeRequestResponse response) {
         RecipeRequest request = requestRepository.findById(requestId)
-                .orElseThrow(() -> new ItemException("Solicitação não encontrada"));
+                .orElseThrow(() -> new CookerException("Solicitação não encontrada"));
 
         request.getResponses().add(response);
         requestRepository.save(request);

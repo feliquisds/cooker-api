@@ -2,16 +2,16 @@ package com.expsn.cooker.exception;
 
 import org.springframework.http.HttpStatus;
 
-public class BusinessException extends RuntimeException {
+public class CookerException extends RuntimeException {
 
     private final HttpStatus status;
 
-    public BusinessException(String message) {
+    public CookerException(String message) {
         super(message);
         this.status = HttpStatus.PRECONDITION_FAILED;
     }
 
-    public BusinessException(String message, HttpStatus status) {
+    public CookerException(String message, HttpStatus status) {
         super(message);
         this.status = status;
     }

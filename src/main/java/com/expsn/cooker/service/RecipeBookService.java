@@ -8,8 +8,7 @@ import org.springframework.data.mongodb.core.aggregation.LookupOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
-import com.expsn.cooker.exception.BusinessException;
-import com.expsn.cooker.exception.ItemException;
+import com.expsn.cooker.exception.CookerException;
 import com.expsn.cooker.model.BookComponent;
 import com.expsn.cooker.model.Category;
 import com.expsn.cooker.model.RecipeBook;
@@ -43,7 +42,7 @@ public class RecipeBookService {
 
     public List<RecipeBook> getSavedBooks(String userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ItemException("Usuário não encontrado"));
+                .orElseThrow(() -> new CookerException("Usuário não encontrado"));
 
         if (user.getSavedBookIds() == null || user.getSavedBookIds().isEmpty()) {
             return List.of();
@@ -90,12 +89,12 @@ public class RecipeBookService {
 
     public RecipeBook getBookById(String id, String userId) {
         RecipeBook book = recipeBookRepository.findById(id)
-            .orElseThrow(() -> new ItemException("Livro não encontrado"));
+            .orElseThrow(() -> new CookerException("Livro não encontrado"));
         User owner = userRepository.findById(book.getOwnerId())
-            .orElseThrow(() -> new ItemException("Dono do livro não encontrado"));
+            .orElseThrow(() -> new CookerException("Dono do livro não encontrado"));
 
         if (!canViewBook(book, owner, userId)) {
-            throw new BusinessException("Acesso negado a este livro");
+            throw new CookerException("Acesso negado a este livro");
         }
 
         hydrateItems(book.getItems());
@@ -127,7 +126,7 @@ public class RecipeBookService {
 
     private boolean canViewBook(RecipeBook book, String userId) {
         User owner = userRepository.findById(book.getOwnerId())
-                .orElseThrow(() -> new ItemException("Dono do livro não encontrado"));
+                .orElseThrow(() -> new CookerException("Dono do livro não encontrado"));
 
         return canViewBook(book, owner, userId);
     }

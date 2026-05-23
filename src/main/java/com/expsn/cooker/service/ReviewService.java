@@ -10,8 +10,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
 import com.expsn.cooker.model.Status;
-import com.expsn.cooker.exception.BusinessException;
-import com.expsn.cooker.exception.ItemException;
+import com.expsn.cooker.exception.CookerException;
 import com.expsn.cooker.model.Recipe;
 import com.expsn.cooker.model.Review;
 import com.expsn.cooker.model.User;
@@ -36,7 +35,7 @@ public class ReviewService {
         if (review.getContentMD() == null || review.getContentMD().isEmpty()
             || review.getImages() == null || review.getImages().isEmpty()
             || review.getRating() == null) {
-            throw new BusinessException("O conteúdo do review é obrigatório");
+            throw new CookerException("O conteúdo do review é obrigatório");
         }
 
         // Simulação da Regra de Negócio: Revisado por IA
@@ -47,9 +46,9 @@ public class ReviewService {
 
     public List<Review> getVisibleReviews(String recipeId, String currentUserId) {
         Recipe recipe = recipeRepository.findById(recipeId)
-                .orElseThrow(() -> new ItemException("Receita não encontrada"));
+                .orElseThrow(() -> new CookerException("Receita não encontrada"));
         User recipeAuthor = userRepository.findById(recipe.getAuthorId())
-                .orElseThrow(() -> new ItemException("Autor da receita não encontrado"));
+                .orElseThrow(() -> new CookerException("Autor da receita não encontrado"));
 
         if (isRecipePubliclyVisible(recipe, recipeAuthor)) {
             return reviewRepository.findByTargetIdAndAiStatus(recipeId, Status.APPROVED);
@@ -59,7 +58,7 @@ public class ReviewService {
             return reviewRepository.findByTargetIdAndAiStatus(recipeId, Status.APPROVED);
         }
 
-        throw new BusinessException("Acesso negado a esta receita");
+        throw new CookerException("Acesso negado a esta receita");
     }
 
     public List<Review> getReviewsFromUser(String userId) {
@@ -68,9 +67,9 @@ public class ReviewService {
 
     public List<Review> getReviewsForRecipe(String recipeId) {
         Recipe recipe = recipeRepository.findById(recipeId)
-            .orElseThrow(() -> new ItemException("Receita não encontrada"));
+            .orElseThrow(() -> new CookerException("Receita não encontrada"));
         User recipeAuthor = userRepository.findById(recipe.getAuthorId())
-            .orElseThrow(() -> new ItemException("Autor da receita não encontrado"));
+            .orElseThrow(() -> new CookerException("Autor da receita não encontrado"));
 
         if (!isRecipePubliclyVisible(recipe, recipeAuthor)) {
             return Collections.emptyList();

@@ -2,8 +2,7 @@ package com.expsn.cooker.service;
 
 import org.springframework.stereotype.Service;
 
-import com.expsn.cooker.exception.BusinessException;
-import com.expsn.cooker.exception.ItemException;
+import com.expsn.cooker.exception.CookerException;
 import com.expsn.cooker.model.User;
 import com.expsn.cooker.model.dto.UserPublic;
 import com.expsn.cooker.repository.UserRepository;
@@ -18,7 +17,7 @@ public class UserService {
 
     public User findById(String id) {
         return userRepository.findById(id).orElseThrow(
-            () -> new ItemException("Usuário não encontrado")
+            () -> new CookerException("Usuário não encontrado")
         );
     }
 
@@ -56,12 +55,12 @@ public class UserService {
 
     public UserPublic getUserProfile(String handle, String currentUserId) {
         User user = userRepository.findByHandle(handle).orElseThrow(
-            () -> new ItemException("Usuário não encontrado")
+            () -> new CookerException("Usuário não encontrado")
         );
         
         // Se o usuário for privado e não for o próprio dono vendo
         if (user.isPrivate() && !user.getId().equals(currentUserId)) {
-            throw new BusinessException("Este perfil é privado");
+            throw new CookerException("Este perfil é privado");
         }
         
         return new UserPublic(user.getName(), user.getHandle(), user.getBio(), user.getAvatarUrl());
@@ -72,7 +71,7 @@ public class UserService {
         
         // Se o usuário for privado e não for o próprio dono vendo
         if (user.isPrivate() && !user.getId().equals(currentUserId)) {
-            throw new BusinessException("Este perfil é privado");
+            throw new CookerException("Este perfil é privado");
         }
         
         return new UserPublic(user.getName(), user.getHandle(), user.getBio(), user.getAvatarUrl());

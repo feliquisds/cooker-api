@@ -1,7 +1,6 @@
 package com.expsn.cooker.service;
 
-import com.expsn.cooker.exception.BusinessException;
-import com.expsn.cooker.exception.ItemException;
+import com.expsn.cooker.exception.CookerException;
 import com.expsn.cooker.model.User;
 import com.expsn.cooker.model.dto.AuthResponse;
 import com.expsn.cooker.model.dto.LoginRequest;
@@ -30,11 +29,11 @@ public class AuthService {
 
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new BusinessException("Email is already registered");
+            throw new CookerException("Email is already registered");
         }
 
         if (userRepository.findByHandle(request.getHandle()).isPresent()) {
-            throw new BusinessException("Handle is already taken");
+            throw new CookerException("Handle is already taken");
         }
 
         User user = User.builder()
@@ -59,12 +58,12 @@ public class AuthService {
             Authentication authentication = authenticate(request.getEmail(), request.getPassword());
             String email = authentication.getName();
             User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ItemException("Usuário não encontrado"));
+                .orElseThrow(() -> new CookerException("Usuário não encontrado"));
 
             return buildAuthResponse(user);
 
         } catch (AuthenticationException _) {
-            throw new BusinessException("Email ou senha inválidos");
+            throw new CookerException("Email ou senha inválidos");
         }
     }
 
