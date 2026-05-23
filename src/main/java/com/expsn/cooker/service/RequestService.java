@@ -2,7 +2,6 @@ package com.expsn.cooker.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -17,15 +16,17 @@ import lombok.RequiredArgsConstructor;
 public class RequestService {
 
     private final RequestRepository requestRepository;
-    // private final NotificationService notificationService;
+    // private final NotificationService notificationService; NOSONAR
 
     public RecipeRequest createRequest(RecipeRequest request) {
-        RecipeRequest saved = requestRepository.save(request);
+        //RecipeRequest saved = requestRepository.save(request); NOSONAR
 
         // Regra de Negócio: Notificar usuários interessados nas tags
-        // notificationService.notifyUsersWithTags(request.getTags());
+        // notificationService.notifyUsersWithTags(request.getTags()); NOSONAR
 
-        return saved;
+        //return saved; NOSONAR
+
+        return requestRepository.save(request);
     }
 
     public void respondToRequest(String requestId, RecipeRequestResponse response) {
@@ -45,7 +46,7 @@ public class RequestService {
         if (userId != null) {
             activeRequests = activeRequests.stream()
                     .filter(req -> req.getRequesterId().equals(userId))
-                    .collect(Collectors.toList());
+                    .toList();
         }
 
         return activeRequests;

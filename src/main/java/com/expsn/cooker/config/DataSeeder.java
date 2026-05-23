@@ -1,7 +1,8 @@
 package com.expsn.cooker.config;
 
-import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +31,7 @@ public class DataSeeder implements CommandLineRunner {
     private final RecipeRepository recipeRepository;
     private final RecipeBookRepository bookRepository;
     private final MongoTemplate mongoTemplate;
+    private final Logger logger = Logger.getLogger(DataSeeder.class.getName());
 
     @Value("${app.seeder.enabled:false}")
     private boolean seederEnabled;
@@ -39,7 +41,7 @@ public class DataSeeder implements CommandLineRunner {
         if (!seederEnabled) {
             return;
         }
-        System.out.println(">>> CONECTADO AO BANCO: " + mongoTemplate.getDb().getName());
+        logger.info(">>> CONECTADO AO BANCO: " + mongoTemplate.getDb().getName());
 
         User rafa = User.builder()
                 .handle("rafafafa")
@@ -49,7 +51,7 @@ public class DataSeeder implements CommandLineRunner {
                 .isPrivate(false)
                 .avatarUrl(null)
                 .bio("Meu nome é Rafa e gosto muito de cozinhar. Apoie o projeto Cooker!")
-                .birthDate(new Date(2002 - 1900, 3 - 1, 5).toLocalDate())
+                .birthDate(LocalDate.of(2002, 3, 5))
                 .favoriteRecipeIds(null)
                 .notificationTags(null)
                 .savedBookIds(null)
@@ -99,6 +101,6 @@ public class DataSeeder implements CommandLineRunner {
                 .build();
         bookRepository.save(meuLivro);
 
-        System.out.println(">>> Banco de Dados COOKER populado com sucesso! <<<");
+        logger.info(">>> Banco de Dados COOKER populado com sucesso! <<<");
     }
 }

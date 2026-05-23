@@ -10,6 +10,8 @@ import org.springframework.data.mongodb.core.aggregation.LookupOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
+import com.expsn.cooker.exception.BusinessException;
+import com.expsn.cooker.exception.ItemException;
 import com.expsn.cooker.model.Difficulty;
 import com.expsn.cooker.model.Recipe;
 import com.expsn.cooker.model.User;
@@ -28,12 +30,12 @@ public class RecipeService {
 
     public Recipe getRecipeById(String id, String userId) {
         Recipe recipe = recipeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Receita não encontrada"));
+            .orElseThrow(() -> new ItemException("Receita não encontrada"));
         User author = userRepository.findById(recipe.getAuthorId())
-                .orElseThrow(() -> new RuntimeException("Autor da receita não encontrado"));
+            .orElseThrow(() -> new ItemException("Autor da receita não encontrado"));
 
         if (!canViewRecipe(recipe, author, userId)) {
-            throw new RuntimeException("Você não tem permissão para visualizar esta receita");
+            throw new BusinessException("Você não tem permissão para visualizar esta receita");
         }
 
         return recipe;
@@ -47,10 +49,10 @@ public class RecipeService {
 
     public Recipe updateRecipe(String recipeId, Recipe updatedData, String userId) {
         Recipe existing = recipeRepository.findById(recipeId)
-                .orElseThrow(() -> new RuntimeException("Receita não encontrada"));
+            .orElseThrow(() -> new ItemException("Receita não encontrada"));
 
         if (!isOwner(existing.getAuthorId(), userId)) {
-            throw new RuntimeException("Você não tem permissão para editar esta receita");
+            throw new BusinessException("Você não tem permissão para editar esta receita");
         }
 
         existing.setTitle(updatedData.getTitle());

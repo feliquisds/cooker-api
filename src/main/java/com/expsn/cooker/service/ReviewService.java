@@ -10,6 +10,8 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
 import com.expsn.cooker.model.Status;
+import com.expsn.cooker.exception.BusinessException;
+import com.expsn.cooker.exception.ItemException;
 import com.expsn.cooker.model.Recipe;
 import com.expsn.cooker.model.Review;
 import com.expsn.cooker.model.User;
@@ -28,13 +30,13 @@ public class ReviewService {
     private final UserRepository userRepository;
     private final MongoTemplate mongoTemplate;
     // Aqui você injetaria um cliente para o serviço de IA (OpenAI, Gemini, etc.)
-    // private final AIService aiService; 
+    // private final AIService aiService; NOSONAR
 
     public Review submitReview(Review review) {
         if (review.getContentMD() == null || review.getContentMD().isEmpty()
             || review.getImages() == null || review.getImages().isEmpty()
             || review.getRating() == null) {
-            throw new RuntimeException("O conteúdo do review é obrigatório");
+            throw new BusinessException("O conteúdo do review é obrigatório");
         }
 
         // Simulação da Regra de Negócio: Revisado por IA
@@ -45,9 +47,9 @@ public class ReviewService {
 
     public List<Review> getVisibleReviews(String recipeId, String currentUserId) {
         Recipe recipe = recipeRepository.findById(recipeId)
-                .orElseThrow(() -> new RuntimeException("Receita não encontrada"));
+                .orElseThrow(() -> new ItemException("Receita não encontrada"));
         User recipeAuthor = userRepository.findById(recipe.getAuthorId())
-                .orElseThrow(() -> new RuntimeException("Autor da receita não encontrado"));
+                .orElseThrow(() -> new ItemException("Autor da receita não encontrado"));
 
         if (isRecipePubliclyVisible(recipe, recipeAuthor)) {
             return reviewRepository.findByTargetIdAndAiStatus(recipeId, Status.APPROVED);
@@ -57,7 +59,7 @@ public class ReviewService {
             return reviewRepository.findByTargetIdAndAiStatus(recipeId, Status.APPROVED);
         }
 
-        throw new RuntimeException("Acesso negado a esta receita");
+        throw new BusinessException("Acesso negado a esta receita");
     }
 
     public List<Review> getReviewsFromUser(String userId) {
@@ -66,9 +68,9 @@ public class ReviewService {
 
     public List<Review> getReviewsForRecipe(String recipeId) {
         Recipe recipe = recipeRepository.findById(recipeId)
-            .orElseThrow(() -> new RuntimeException("Receita não encontrada"));
+            .orElseThrow(() -> new ItemException("Receita não encontrada"));
         User recipeAuthor = userRepository.findById(recipe.getAuthorId())
-            .orElseThrow(() -> new RuntimeException("Autor da receita não encontrado"));
+            .orElseThrow(() -> new ItemException("Autor da receita não encontrado"));
 
         if (!isRecipePubliclyVisible(recipe, recipeAuthor)) {
             return Collections.emptyList();

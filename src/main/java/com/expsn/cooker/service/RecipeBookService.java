@@ -8,6 +8,8 @@ import org.springframework.data.mongodb.core.aggregation.LookupOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
+import com.expsn.cooker.exception.BusinessException;
+import com.expsn.cooker.exception.ItemException;
 import com.expsn.cooker.model.BookComponent;
 import com.expsn.cooker.model.Category;
 import com.expsn.cooker.model.RecipeBook;
@@ -88,12 +90,12 @@ public class RecipeBookService {
 
     public RecipeBook getBookById(String id, String userId) {
         RecipeBook book = recipeBookRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Livro não encontrado"));
+            .orElseThrow(() -> new ItemException("Livro não encontrado"));
         User owner = userRepository.findById(book.getOwnerId())
-                .orElseThrow(() -> new RuntimeException("Dono do livro não encontrado"));
+            .orElseThrow(() -> new ItemException("Dono do livro não encontrado"));
 
         if (!canViewBook(book, owner, userId)) {
-            throw new RuntimeException("Acesso negado a este livro");
+            throw new BusinessException("Acesso negado a este livro");
         }
 
         hydrateItems(book.getItems());

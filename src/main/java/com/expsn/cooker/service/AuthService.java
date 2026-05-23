@@ -1,5 +1,6 @@
 package com.expsn.cooker.service;
 
+import com.expsn.cooker.exception.BusinessException;
 import com.expsn.cooker.model.User;
 import com.expsn.cooker.model.dto.AuthResponse;
 import com.expsn.cooker.model.dto.LoginRequest;
@@ -7,6 +8,7 @@ import com.expsn.cooker.model.dto.RegisterRequest;
 import com.expsn.cooker.repository.UserRepository;
 import com.expsn.cooker.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -27,11 +29,11 @@ public class AuthService {
 
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new RuntimeException("Email is already registered");
+            throw new BusinessException("Email is already registered");
         }
 
         if (userRepository.findByHandle(request.getHandle()).isPresent()) {
-            throw new RuntimeException("Handle is already taken");
+            throw new BusinessException("Handle is already taken");
         }
 
         User user = User.builder()
@@ -60,8 +62,8 @@ public class AuthService {
 
             return buildAuthResponse(user);
 
-        } catch (AuthenticationException e) {
-            throw new RuntimeException("Email ou senha inválidos");
+        } catch (AuthenticationException _) {
+            throw new BusinessException("Email ou senha inválidos");
         }
     }
 

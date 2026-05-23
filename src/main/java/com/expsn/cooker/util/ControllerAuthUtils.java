@@ -1,7 +1,10 @@
 package com.expsn.cooker.util;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
+
+import com.expsn.cooker.exception.BusinessException;
 
 import lombok.experimental.UtilityClass;
 
@@ -19,7 +22,7 @@ public final class ControllerAuthUtils {
     public static String resolveRequiredUserId(Authentication authentication) {
         String userId = resolveCurrentUserId(authentication);
         if (userId == null) {
-            throw new RuntimeException("Usuário não autenticado");
+            throw new BusinessException("Usuário não autenticado", HttpStatus.UNAUTHORIZED);
         }
 
         return userId;
