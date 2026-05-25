@@ -22,6 +22,10 @@ public class Text {
 
     @Field(targetType = FieldType.OBJECT_ID)
     private String authorId;
+
+    @Field(targetType = FieldType.OBJECT_ID)
+    private String bookOriginId;
+    
     private String title;
     private List<String> tags;
     
@@ -33,4 +37,6 @@ public class Text {
     private LocalDateTime createdAt;
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
+    private double rating; // average rating from reviews
 }

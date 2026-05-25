@@ -44,7 +44,9 @@ public class AuthService {
                 .isPrivate(false)
                 .favoriteRecipeIds(new ArrayList<>())
                 .savedBookIds(new ArrayList<>())
-                .notificationTags(new ArrayList<>())
+                .requestNotificationTags(new ArrayList<>())
+                .recipeNotificationTags(new ArrayList<>())
+                .rating(0)
                 .build();
 
         User savedUser = userRepository.save(user);

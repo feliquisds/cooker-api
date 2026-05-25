@@ -53,13 +53,26 @@ public class DataSeeder implements CommandLineRunner {
                 .bio("Meu nome é Rafa e gosto muito de cozinhar. Apoie o projeto Cooker!")
                 .birthDate(LocalDate.of(2002, 3, 5))
                 .favoriteRecipeIds(null)
-                .notificationTags(null)
+                .recipeNotificationTags(null)
+                .requestNotificationTags(null)
                 .savedBookIds(null)
+                .rating(0)
                 .build();
         rafa = userRepository.save(rafa);
 
+        RecipeBook meuLivro = RecipeBook.builder()
+                .ownerId(rafa.getId())
+                .title("Receitas IV")
+                .descriptionMD("Meu objetivo aqui é ensinar que qualquer um (sim, até você!) pode aprender a cozinhar. Todas as receitas nesse site foram testadas e aprovadas por mim, então meticulosamente adaptadas e traduzidas (quando necessário).")
+                .isPublic(true)
+                .items(null)
+                .rating(0)
+                .build();
+        meuLivro = bookRepository.save(meuLivro);
+
         Recipe temperoVerde = Recipe.builder()
                 .authorId(rafa.getId())
+                .bookOriginId(meuLivro.getId())
                 .title("Tempero verde")
                 .difficulty(Difficulty.EASY)
                 .timeMinutes(5)
@@ -79,6 +92,7 @@ public class DataSeeder implements CommandLineRunner {
                                 .build()
                 ))
                 .stepsMD(List.of("Bata todos os ingredientes no processador de alimentos. O tempero dura até 3 dias na geladeira."))
+                .rating(0)
                 .build();
         temperoVerde = recipeRepository.save(temperoVerde);
 
@@ -92,13 +106,7 @@ public class DataSeeder implements CommandLineRunner {
         temperosCategory.setName("Temperos");
         temperosCategory.setItems(List.of(refTemperoVerde));
 
-        RecipeBook meuLivro = RecipeBook.builder()
-                .ownerId(rafa.getId())
-                .title("Receitas IV")
-                .descriptionMD("Meu objetivo aqui é ensinar que qualquer um (sim, até você!) pode aprender a cozinhar. Todas as receitas nesse site foram testadas e aprovadas por mim, então meticulosamente adaptadas e traduzidas (quando necessário).")
-                .isPublic(true)
-                .items(List.of(temperosCategory))
-                .build();
+        meuLivro.setItems(List.of(temperosCategory));
         bookRepository.save(meuLivro);
 
         logger.info(">>> Banco de Dados COOKER populado com sucesso! <<<");

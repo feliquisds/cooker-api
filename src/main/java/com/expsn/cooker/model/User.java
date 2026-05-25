@@ -28,7 +28,11 @@ public class User {
     private LocalDate birthDate;
     private boolean isPrivate;
     
-    private List<String> notificationTags;
+    private List<String> recipeNotificationTags;
+    private List<String> requestNotificationTags;
+
     private List<String> favoriteRecipeIds;
     private List<String> savedBookIds;
+
+    private double rating; // average rating from reviews of all authored items
 }

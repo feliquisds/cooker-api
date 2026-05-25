@@ -30,4 +30,6 @@ public class RecipeBook {
 
     @CreatedDate
     private LocalDateTime createdAt;
+
+    private double rating; // average rating from reviews of all contained items
 }

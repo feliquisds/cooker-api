@@ -22,6 +22,10 @@ public class Recipe {
 
     @Field(targetType = FieldType.OBJECT_ID)
     private String authorId;
+
+    @Field(targetType = FieldType.OBJECT_ID)
+    private String bookOriginId;
+    
     private String title;
     private List<String> images;
     private List<String> tags;
@@ -40,4 +44,6 @@ public class Recipe {
     private LocalDateTime createdAt;
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
+    private double rating; // average rating from reviews
 }
