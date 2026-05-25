@@ -1,0 +1,32 @@
+---
+config:
+    mirrorActors: false
+---
+
+sequenceDiagram
+    actor U as Usuário
+    participant F as Frontend
+    participant C as RequestController
+    participant S as RequestService
+    participant R as RequestRepository
+    participant N as NotificationClient
+
+    U->>+F: Criar solicitação de receita
+    F->>+C: POST /api/requests {Request, Token}
+
+    break Usuário não autenticado
+        C-->>F: HTTP 401
+        F-->>U: Usuário não autenticado
+    end
+
+    C->>+S: save(Request request, String userId)
+    S->>+R: save(Request request)
+    R-->>-S: Request
+
+    S->>+N: queueNotifyRequestInterest(Request request)
+    N-->>-S: void
+    Note right of N: Processamento assincrono
+
+    S-->>-C: Request
+    C-->>-F: HTTP 200
+    F-->>-U: Solicitação de receita criada com sucesso

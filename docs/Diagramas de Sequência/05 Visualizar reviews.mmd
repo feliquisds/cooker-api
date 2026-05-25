@@ -28,10 +28,12 @@ sequenceDiagram
     %% - O usuário é público
     %% - A receita é pública
     %% - O livro de receita em que a receita está é público
+    %% - O review está como status APPROVED
+    %% - O usuário é o próprio autor do review
 
-    alt Usuário sem permissão
-        S-->>C: BusinessException
-        C-->>F: HTTP 403
+    break Usuário sem permissão
+        S-->>C: Exception
+        C-->>F: HTTP 412
         F-->>U: Acesso negado
     end
 

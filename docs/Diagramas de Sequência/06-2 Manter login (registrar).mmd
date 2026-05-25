@@ -17,22 +17,22 @@ sequenceDiagram
 
     S->>+R: findByEmail(String email)
     R-->>-S: User
-    alt Email existe
-        S-->>C: BusinessException
-        C-->>F: HTTP 400
+    break Email existe
+        S-->>C: Exception
+        C-->>F: HTTP 412
         F-->>U: Email já cadastrado
     end
 
     S->>+R: findByHandle(String handle)
     R-->>-S: User
-    alt Nome de usuário existe
-        S-->>C: BusinessException
-        C-->>F: HTTP 400
+    break Nome de usuário existe
+        S-->>C: Exception
+        C-->>F: HTTP 412
         F-->>U: Nome de usuário já cadastrado
     end
 
     S->>+A: authenticate(String email, String password)
     A-->>-S: Authentication
     S-->>-C: AuthResponse
-    C-->>-F: HTTP 201
+    C-->>-F: HTTP 200
     F-->>-U: Usuário criado

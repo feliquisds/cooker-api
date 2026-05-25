@@ -21,8 +21,8 @@ sequenceDiagram
     S->>+R: findById(String id)
     R-->>-S: PublicUserDTO
 
-    alt Usuário não encontrado
-        S-->>C: ItemException
+    break Usuário não encontrado
+        S-->>C: Exception
         C-->>F: HTTP 412
         F-->>U: Usuário não encontrado
     end
@@ -33,9 +33,9 @@ sequenceDiagram
     %% - O usuário é o próprio dono do perfil
     %% - O usuário é público
 
-    alt Usuário sem permissão
-        S-->>C: BusinessException
-        C-->>F: HTTP 403
+    break Usuário sem permissão
+        S-->>C: Exception
+        C-->>F: HTTP 412
         F-->>U: Acesso negado
     end
 

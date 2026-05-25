@@ -21,8 +21,8 @@ sequenceDiagram
     S->>+R: findById(String id)
     R-->>-S: RecipeBook
 
-    alt Livro não encontrado
-        S-->>C: ItemException
+    break Livro não encontrado
+        S-->>C: Exception
         C-->>F: HTTP 412
         F-->>U: Livro de receita não encontrado
     end
@@ -34,9 +34,9 @@ sequenceDiagram
     %% - O usuário é público
     %% - O livro de receita é público
 
-    alt Usuário sem permissão
-        S-->>C: BusinessException
-        C-->>F: HTTP 403
+    break Usuário sem permissão
+        S-->>C: Exception
+        C-->>F: HTTP 412
         F-->>U: Acesso negado
     end
 

@@ -14,7 +14,7 @@ sequenceDiagram
     F->>+C: GET /api/users/me/reviews {Token}
 
     alt Usuário não autenticado
-        C-->>F: HTTP 403
+        C-->>F: HTTP 401
         F-->>U: Usuário não autenticado
     end
 

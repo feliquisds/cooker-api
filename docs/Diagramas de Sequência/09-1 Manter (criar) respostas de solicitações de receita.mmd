@@ -1,0 +1,39 @@
+---
+config:
+    mirrorActors: false
+---
+
+sequenceDiagram
+    actor U as Usuário
+    participant F as Frontend
+    participant C as RequestController
+    participant S as RequestService
+    participant R as RequestRepository
+    participant N as NotificationClient
+
+    U->>+F: Criar resposta para solicitação de receita
+    F->>+C: POST /api/requests/{id} {RequestResponse, Token}
+
+    break Usuário não autenticado
+        C-->>F: HTTP 401
+        F-->>U: Usuário não autenticado
+    end
+
+    C->>+S: save(RequestResponse response, String userId)
+
+    break Usuário sem permissão
+        S-->>C: Exception
+        C-->>F: HTTP 412
+        F-->>U: Acesso negado
+    end
+
+    S->>+R: save(RequestResponse response)
+    R-->>-S: RequestResponse
+
+    S->>+N: queueNotifyRequestResponse(RequestResponse response)
+    N-->>-S: void
+    Note right of N: Processamento assincrono
+
+    S-->>-C: RequestResponse
+    C-->>-F: HTTP 200
+    F-->>-U: Resposta para solicitação de receita criada com sucesso

@@ -1,0 +1,26 @@
+---
+config:
+    mirrorActors: false
+---
+
+sequenceDiagram
+    actor U as Usuário
+    participant F as Frontend
+    participant C as UserController
+    participant S as UserService
+    participant R as UserRepository
+
+    U->>+F: Editar perfil
+    F->>+C: POST /api/users/me {User, Token}
+
+    break Usuário não autenticado
+        C-->>F: HTTP 401
+        F-->>U: Usuário não autenticado
+    end
+
+    C->>+S: save(User user, String userId)
+    S->>+R: save(User user)
+    R-->>-S: User
+    S-->>-C: User
+    C-->>-F: HTTP 200
+    F-->>-U: Perfil atualizado com sucesso

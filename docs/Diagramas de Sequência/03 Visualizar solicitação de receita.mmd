@@ -21,8 +21,8 @@ sequenceDiagram
     S->>+R: findById(String id)
     R-->>-S: Request
 
-    alt Solicitação não encontrada
-        S-->>C: ItemException
+    break Solicitação não encontrada
+        S-->>C: Exception
         C-->>F: HTTP 412
         F-->>U: Solicitação não encontrada
     end
@@ -33,9 +33,9 @@ sequenceDiagram
     %% - O usuário é o próprio dono da solicitação
     %% - O usuário é público
 
-    alt Usuário sem permissão
-        S-->>C: BusinessException
-        C-->>F: HTTP 403
+    break Usuário sem permissão
+        S-->>C: Exception
+        C-->>F: HTTP 412
         F-->>U: Acesso negado
     end
 

@@ -1,0 +1,38 @@
+---
+config:
+    mirrorActors: false
+---
+
+sequenceDiagram
+    actor U as Usuário
+    participant F as Frontend
+    participant C as RecipeBookController
+    participant S as RecipeBookService
+    participant R as RecipeBookRepository
+
+    U->>+F: Apagar livro de receita
+    F->>+C: DELETE /api/books/{id} {Token}
+
+    break Usuário não autenticado
+        C-->>F: HTTP 401
+        F-->>U: Usuário não autenticado
+    end
+
+    break Livro de receita não encontrado
+        C-->>F: HTTP 412
+        F-->>U: Livro de receita não encontrado
+    end
+
+    C->>+S: delete(String id, String userId)
+
+    break Usuário sem permissão
+        S-->>C: Exception
+        C-->>F: HTTP 412
+        F-->>U: Acesso negado
+    end
+
+    S->>+R: delete(String id)
+    R-->>-S: void
+    S-->>-C: void
+    C-->>-F: HTTP 200
+    F-->>-U: Livro de receitas apagado com sucesso

@@ -17,9 +17,9 @@ sequenceDiagram
 
     S->>+R: findByEmail(String email)
     R-->>-S: User
-    alt Email não existe
-        S-->>C: BusinessException
-        C-->>F: HTTP 400
+    break Email não existe
+        S-->>C: Exception
+        C-->>F: HTTP 412
         F-->>U: Email não existe
     end
 

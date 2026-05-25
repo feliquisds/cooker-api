@@ -1,0 +1,45 @@
+---
+config:
+    mirrorActors: false
+---
+
+sequenceDiagram
+    actor U as Usuário
+    participant F as Frontend
+    participant C as RecipeController
+    participant S as RecipeService
+    participant R as RecipeRepository
+    participant N as NotificationClient
+
+    U->>+F: Criar/atualizar receita
+    F->>+C: POST /api/recipes {Recipe, Token}
+
+    break Usuário não autenticado
+        C-->>F: HTTP 401
+        F-->>U: Usuário não autenticado
+    end
+
+    C->>+S: save(Recipe recipe, String userId)
+
+    break Livro de receita não encontrado
+        S-->>C: Exception
+        C-->>F: HTTP 412
+        F-->>U: Livro de receita não encontrado
+    end
+
+    break Usuário sem permissão
+        S-->>C: Exception
+        C-->>F: HTTP 412
+        F-->>U: Acesso negado
+    end
+
+    S->>+R: save(Recipe recipe)
+    R-->>-S: Recipe
+
+    S->>+N: queueNotifyRecipeInterest(Recipe recipe)
+    N-->>-S: void
+    Note right of N: Processamento assincrono
+
+    S-->>-C: Recipe
+    C-->>-F: HTTP 200
+    F-->>-U: Receita criada/atualizada com sucesso

@@ -1,0 +1,44 @@
+---
+config:
+    mirrorActors: false
+---
+
+sequenceDiagram
+    actor U as Usuário
+    participant F as Frontend
+    participant C as ReviewController
+    participant S as ReviewService
+    participant R as ReviewRepository
+    participant A as AIClient
+
+    U->>+F: Criar review
+    F->>+C: POST /api/recipes/{id}/reviews {Review, Token}
+
+    break Usuário não autenticado
+        C-->>F: HTTP 401
+        F-->>U: Usuário não autenticado
+    end
+
+    C->>+S: save(Review review, String userId)
+
+    break Usuário sem permissão
+        S-->>C: Exception
+        C-->>F: HTTP 412
+        F-->>U: Acesso negado
+    end
+
+    S->>+R: save(Review review)
+    R-->>-S: Review
+
+    S->>+A: queueForAnalysis(Review review)
+    A-->>S: void
+    Note right of A: Processamento assincrono
+
+    S-->>-C: Review
+    C-->>-F: HTTP 200
+    F-->>-U: Review criado com sucesso
+
+    A->>-S: updateStatus(String reviewId, Status status)
+    S->>+R: updateStatus(String reviewId, Status status)
+    R-->>-S: void
+    S->>S: updateRanking(String recipeId)

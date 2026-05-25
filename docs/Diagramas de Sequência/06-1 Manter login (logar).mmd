@@ -16,9 +16,9 @@ sequenceDiagram
     C->>+S: login(LoginRequest loginRequest)
     S->>+A: authenticate(String email, String password)
 
-    alt Credenciais inválidas
+    break Credenciais inválidas
         A-->>S: Exception
-        S-->>C: BusinessException
+        S-->>C: Exception
         C-->>F: HTTP 412
         F-->>U: Credenciais inválidas
     end

@@ -1,0 +1,38 @@
+---
+config:
+    mirrorActors: false
+---
+
+sequenceDiagram
+    actor U as Usuário
+    participant F as Frontend
+    participant C as RecipeController
+    participant S as RecipeService
+    participant R as RecipeRepository
+
+    U->>+F: Apagar receita
+    F->>+C: DELETE /api/recipes/{id} {Token}
+
+    break Usuário não autenticado
+        C-->>F: HTTP 401
+        F-->>U: Usuário não autenticado
+    end
+
+    C->>+S: delete(String id, String userId)
+
+    break Receita não encontrada
+        C-->>F: HTTP 412
+        F-->>U: Receita não encontrada
+    end
+
+    break Usuário sem permissão
+        S-->>C: Exception
+        C-->>F: HTTP 412
+        F-->>U: Acesso negado
+    end
+
+    S->>+R: delete(String id)
+    R-->>-S: void
+    S-->>-C: void
+    C-->>-F: HTTP 200
+    F-->>-U: Receita apagada com sucesso

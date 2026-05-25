@@ -1,0 +1,26 @@
+---
+config:
+    mirrorActors: false
+---
+
+sequenceDiagram
+    actor U as Usuário
+    participant F as Frontend
+    participant C as RecipeBookController
+    participant S as RecipeBookService
+    participant R as RecipeBookRepository
+
+    U->>+F: Criar/atualizar livro de receita
+    F->>+C: POST /api/books {RecipeBook, Token}
+
+    break Usuário não autenticado
+        C-->>F: HTTP 401
+        F-->>U: Usuário não autenticado
+    end
+
+    C->>+S: save(RecipeBook recipeBook, String userId)
+    S->>+R: save(RecipeBook recipeBook)
+    R-->>-S: RecipeBook
+    S-->>-C: RecipeBook
+    C-->>-F: HTTP 200
+    F-->>-U: Livro de receitas criado/atualizado com sucesso
