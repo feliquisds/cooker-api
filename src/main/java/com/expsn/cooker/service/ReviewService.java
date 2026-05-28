@@ -9,11 +9,13 @@ import org.springframework.data.mongodb.core.aggregation.LookupOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
-import com.expsn.cooker.model.Status;
-import com.expsn.cooker.exception.CookerException;
+import com.expsn.cooker.client.AIClient;
+import com.expsn.cooker.exception.BusinessException;
 import com.expsn.cooker.model.Recipe;
 import com.expsn.cooker.model.Review;
 import com.expsn.cooker.model.User;
+import com.expsn.cooker.exception.ItemException;
+import com.expsn.cooker.model.Status;
 import com.expsn.cooker.repository.RecipeRepository;
 import com.expsn.cooker.repository.ReviewRepository;
 import com.expsn.cooker.repository.UserRepository;
@@ -28,48 +30,64 @@ public class ReviewService {
     private final RecipeRepository recipeRepository;
     private final UserRepository userRepository;
     private final MongoTemplate mongoTemplate;
-    // Aqui você injetaria um cliente para o serviço de IA (OpenAI, Gemini, etc.)
-    // private final AIService aiService; NOSONAR
+    private final AIClient aiClient;
 
-    public Review submitReview(Review review) {
+    public Review save(String recipeId, Review review, String userId) {
+        Recipe recipe = recipeRepository.findById(recipeId)
+                .orElseThrow(() -> new ItemException("Receita não encontrada"));
+        User recipeAuthor = userRepository.findById(recipe.getAuthorId())
+                .orElseThrow(() -> new ItemException("Autor da receita não encontrado"));
+
+        if (userId == null || (!isRecipePubliclyVisible(recipe, recipeAuthor) && !recipeAuthor.getId().equals(userId))) {
+            throw new BusinessException("Acesso negado a esta receita");
+        }
+
         if (review.getContentMD() == null || review.getContentMD().isEmpty()
             || review.getImages() == null || review.getImages().isEmpty()
             || review.getRating() == null) {
-            throw new CookerException("O conteúdo do review é obrigatório");
+            throw new BusinessException("O conteúdo do review é obrigatório");
         }
 
-        // Simulação da Regra de Negócio: Revisado por IA
-        // No mundo real, você faria uma chamada assíncrona ou esperaria o retorno da IA
+        review.setTargetId(recipeId);
+        review.setAuthorId(userId);
         review.setAiStatus(Status.APPROVED);
-        return reviewRepository.save(review);
+
+        Review savedReview = reviewRepository.save(review);
+        aiClient.queueForAnalysis(savedReview);
+        updateRanking(recipeId);
+        return savedReview;
     }
 
     public List<Review> getVisibleReviews(String recipeId, String currentUserId) {
         Recipe recipe = recipeRepository.findById(recipeId)
-                .orElseThrow(() -> new CookerException("Receita não encontrada"));
+                .orElseThrow(() -> new ItemException("Receita não encontrada"));
         User recipeAuthor = userRepository.findById(recipe.getAuthorId())
-                .orElseThrow(() -> new CookerException("Autor da receita não encontrado"));
+                .orElseThrow(() -> new ItemException("Autor da receita não encontrado"));
 
         if (isRecipePubliclyVisible(recipe, recipeAuthor)) {
             return reviewRepository.findByTargetIdAndAiStatus(recipeId, Status.APPROVED);
         }
 
-        if (currentUserId != null && currentUserId.equals(recipe.getAuthorId())) {
+        if (currentUserId == null) {
+            throw new BusinessException("Acesso negado a esta receita");
+        }
+
+        if (currentUserId.equals(recipe.getAuthorId())) {
             return reviewRepository.findByTargetIdAndAiStatus(recipeId, Status.APPROVED);
         }
 
-        throw new CookerException("Acesso negado a esta receita");
+        return reviewRepository.findByTargetIdAndAuthorId(recipeId, currentUserId);
     }
 
-    public List<Review> getReviewsFromUser(String userId) {
-        return reviewRepository.findByAuthorId(userId);
+    public List<Review> getReviewsByUserId(String userId) {
+        return reviewRepository.findByAuthorIdAndAiStatus(userId, Status.APPROVED);
     }
 
     public List<Review> getReviewsForRecipe(String recipeId) {
         Recipe recipe = recipeRepository.findById(recipeId)
-            .orElseThrow(() -> new CookerException("Receita não encontrada"));
+            .orElseThrow(() -> new ItemException("Receita não encontrada"));
         User recipeAuthor = userRepository.findById(recipe.getAuthorId())
-            .orElseThrow(() -> new CookerException("Autor da receita não encontrado"));
+            .orElseThrow(() -> new ItemException("Autor da receita não encontrado"));
 
         if (!isRecipePubliclyVisible(recipe, recipeAuthor)) {
             return Collections.emptyList();
@@ -93,6 +111,30 @@ public class ReviewService {
         );
 
         return mongoTemplate.aggregate(agg, "reviews", Review.class).getMappedResults();
+    }
+
+    public void updateStatus(String reviewId, Status status) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ItemException("Review não encontrado"));
+
+        review.setAiStatus(status);
+        reviewRepository.save(review);
+        updateRanking(review.getTargetId());
+    }
+
+    public void updateRanking(String recipeId) {
+        Recipe recipe = recipeRepository.findById(recipeId)
+                .orElseThrow(() -> new ItemException("Receita não encontrada"));
+
+        List<Review> reviews = reviewRepository.findByTargetIdAndAiStatus(recipeId, Status.APPROVED);
+        if (reviews.isEmpty()) {
+            recipe.setRating(0);
+        } else {
+            double total = reviews.stream().mapToInt(Review::getRating).sum();
+            recipe.setRating(total / reviews.size());
+        }
+
+        recipeRepository.save(recipe);
     }
 
     private boolean isRecipePubliclyVisible(Recipe recipe, User author) {

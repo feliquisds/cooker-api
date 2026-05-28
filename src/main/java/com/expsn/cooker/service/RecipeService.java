@@ -10,10 +10,14 @@ import org.springframework.data.mongodb.core.aggregation.LookupOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
-import com.expsn.cooker.exception.CookerException;
+import com.expsn.cooker.client.NotificationClient;
+import com.expsn.cooker.exception.BusinessException;
+import com.expsn.cooker.exception.ItemException;
 import com.expsn.cooker.model.Difficulty;
 import com.expsn.cooker.model.Recipe;
+import com.expsn.cooker.model.RecipeBook;
 import com.expsn.cooker.model.User;
+import com.expsn.cooker.repository.RecipeBookRepository;
 import com.expsn.cooker.repository.RecipeRepository;
 import com.expsn.cooker.repository.UserRepository;
 
@@ -25,33 +29,56 @@ public class RecipeService {
 
     private final RecipeRepository recipeRepository;
     private final UserRepository userRepository;
+    private final RecipeBookRepository recipeBookRepository;
     private final MongoTemplate mongoTemplate;
+    private final NotificationClient notificationClient;
 
     public Recipe getRecipeById(String id, String userId) {
         Recipe recipe = recipeRepository.findById(id)
-            .orElseThrow(() -> new CookerException("Receita não encontrada"));
+            .orElseThrow(() -> new ItemException("Receita não encontrada"));
         User author = userRepository.findById(recipe.getAuthorId())
-            .orElseThrow(() -> new CookerException("Autor da receita não encontrado"));
+            .orElseThrow(() -> new ItemException("Autor da receita não encontrado"));
 
         if (!canViewRecipe(recipe, author, userId)) {
-            throw new CookerException("Você não tem permissão para visualizar esta receita");
+            throw new BusinessException("Você não tem permissão para visualizar esta receita");
         }
 
         return recipe;
     }
 
-    public Recipe createRecipe(Recipe recipe, String userId) {
+    public Recipe save(Recipe recipe, String userId) {
+        RecipeBook book = recipeBookRepository.findById(recipe.getBookOriginId())
+                .orElseThrow(() -> new ItemException("Livro de receita não encontrado"));
+
+        if (!book.getOwnerId().equals(userId)) {
+            throw new BusinessException("Acesso negado a esta receita");
+        }
+
+        if (recipe.getId() != null) {
+            Recipe existing = recipeRepository.findById(recipe.getId())
+                    .orElseThrow(() -> new ItemException("Receita não encontrada"));
+            if (!existing.getAuthorId().equals(userId)) {
+                throw new BusinessException("Você não tem permissão para editar esta receita");
+            }
+            recipe.setCreatedAt(existing.getCreatedAt());
+        } else {
+            recipe.setCreatedAt(LocalDateTime.now());
+        }
+
         recipe.setAuthorId(userId);
-        recipe.setCreatedAt(LocalDateTime.now());
-        return recipeRepository.save(recipe);
+        recipe.setUpdatedAt(LocalDateTime.now());
+
+        Recipe savedRecipe = recipeRepository.save(recipe);
+        notificationClient.queueNotifyRecipeInterest(savedRecipe);
+        return savedRecipe;
     }
 
     public Recipe updateRecipe(String recipeId, Recipe updatedData, String userId) {
         Recipe existing = recipeRepository.findById(recipeId)
-            .orElseThrow(() -> new CookerException("Receita não encontrada"));
+            .orElseThrow(() -> new ItemException("Receita não encontrada"));
 
         if (!isOwner(existing.getAuthorId(), userId)) {
-            throw new CookerException("Você não tem permissão para editar esta receita");
+            throw new BusinessException("Você não tem permissão para editar esta receita");
         }
 
         existing.setTitle(updatedData.getTitle());
@@ -104,7 +131,7 @@ public class RecipeService {
 
     public List<Recipe> getMyFavoritedRecipes(String userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CookerException("Usuário não encontrado"));
+                .orElseThrow(() -> new ItemException("Usuário não encontrado"));
 
         if (user.getFavoriteRecipeIds() == null || user.getFavoriteRecipeIds().isEmpty()) {
             return List.of();
@@ -113,10 +140,21 @@ public class RecipeService {
         return recipeRepository.findAllById(user.getFavoriteRecipeIds()).stream()
                 .filter(recipe -> {
                     User author = userRepository.findById(recipe.getAuthorId())
-                            .orElseThrow(() -> new CookerException("Autor da receita não encontrado"));
+                            .orElseThrow(() -> new ItemException("Autor da receita não encontrado"));
                     return canViewRecipe(recipe, author, userId);
                 })
                 .toList();
+    }
+
+    public void delete(String id, String userId) {
+        Recipe recipe = recipeRepository.findById(id)
+                .orElseThrow(() -> new ItemException("Receita não encontrada"));
+
+        if (!isOwner(recipe.getAuthorId(), userId)) {
+            throw new BusinessException("Você não tem permissão para editar esta receita");
+        }
+
+        recipeRepository.deleteById(id);
     }
 
     private boolean canViewRecipe(Recipe recipe, User author, String userId) {

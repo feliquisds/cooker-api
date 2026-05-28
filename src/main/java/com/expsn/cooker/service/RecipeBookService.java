@@ -8,7 +8,8 @@ import org.springframework.data.mongodb.core.aggregation.LookupOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
-import com.expsn.cooker.exception.CookerException;
+import com.expsn.cooker.exception.BusinessException;
+import com.expsn.cooker.exception.ItemException;
 import com.expsn.cooker.model.BookComponent;
 import com.expsn.cooker.model.Category;
 import com.expsn.cooker.model.RecipeBook;
@@ -34,15 +35,40 @@ public class RecipeBookService {
 
     private final UserService userService;
 
-    public RecipeBook save(RecipeBook book) {
+    public RecipeBook save(RecipeBook book, String userId) {
+        if (book.getId() != null) {
+            RecipeBook existing = recipeBookRepository.findById(book.getId())
+                    .orElseThrow(() -> new ItemException("Livro de receita não encontrado"));
+
+            if (!existing.getOwnerId().equals(userId)) {
+                throw new BusinessException("Acesso negado a este livro");
+            }
+
+            book.setOwnerId(existing.getOwnerId());
+        } else {
+            book.setOwnerId(userId);
+        }
+
         RecipeBook savedBook = mongoTemplate.save(book);
         userService.addRecipeBookToSaved(savedBook.getOwnerId(), savedBook.getId());
         return savedBook;
     }
 
+    public void delete(String id, String userId) {
+        RecipeBook book = recipeBookRepository.findById(id)
+                .orElseThrow(() -> new ItemException("Livro de receita não encontrado"));
+
+        if (!book.getOwnerId().equals(userId)) {
+            throw new BusinessException("Acesso negado a este livro");
+        }
+
+        recipeBookRepository.deleteById(id);
+        userService.removeRecipeBookFromSaved(userId, id);
+    }
+
     public List<RecipeBook> getSavedBooks(String userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CookerException("Usuário não encontrado"));
+            .orElseThrow(() -> new ItemException("Usuário não encontrado"));
 
         if (user.getSavedBookIds() == null || user.getSavedBookIds().isEmpty()) {
             return List.of();
@@ -89,12 +115,12 @@ public class RecipeBookService {
 
     public RecipeBook getBookById(String id, String userId) {
         RecipeBook book = recipeBookRepository.findById(id)
-            .orElseThrow(() -> new CookerException("Livro não encontrado"));
+            .orElseThrow(() -> new ItemException("Livro de receita não encontrado"));
         User owner = userRepository.findById(book.getOwnerId())
-            .orElseThrow(() -> new CookerException("Dono do livro não encontrado"));
+            .orElseThrow(() -> new ItemException("Dono do livro não encontrado"));
 
         if (!canViewBook(book, owner, userId)) {
-            throw new CookerException("Acesso negado a este livro");
+            throw new BusinessException("Acesso negado a este livro");
         }
 
         hydrateItems(book.getItems());
@@ -126,7 +152,7 @@ public class RecipeBookService {
 
     private boolean canViewBook(RecipeBook book, String userId) {
         User owner = userRepository.findById(book.getOwnerId())
-                .orElseThrow(() -> new CookerException("Dono do livro não encontrado"));
+                .orElseThrow(() -> new ItemException("Dono do livro não encontrado"));
 
         return canViewBook(book, owner, userId);
     }

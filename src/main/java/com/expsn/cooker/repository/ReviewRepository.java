@@ -10,5 +10,6 @@ import com.expsn.cooker.model.Review;
 public interface ReviewRepository extends MongoRepository<Review, String> {
     List<Review> findByTargetIdAndAiStatus(String targetId, Status status);
     List<Review> findByAuthorId(String authorId);
+    List<Review> findByAuthorIdAndAiStatus(String authorId, Status status);
     List<Review> findByTargetIdAndAuthorId(String recipeId, String authorId);
 }

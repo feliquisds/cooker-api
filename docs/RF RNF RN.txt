@@ -28,3 +28,4 @@ RN07 – Todos os reviews de receitas privadas são visíveis somente ao dono da
 RN08 – Usuários podem visualizar todos os reviews que fizeram, mas receitas privadas não são mais acessáveis
 RN09 – Usuários podem receber notificações de receitas novas/em trend com base em tags
 RN10 – Usuários podem receber notificações de requisições com base em tags
+RN11 – Solicitações de receita são fechadas após 30 dias

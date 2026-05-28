@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.expsn.cooker.model.RecipeRequest;
 import com.expsn.cooker.model.RecipeRequestResponse;
 import com.expsn.cooker.service.RequestService;
+import com.expsn.cooker.util.ControllerAuthUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -29,16 +30,22 @@ public class RequestController {
     // requires logged user
     @PostMapping
     public ResponseEntity<RecipeRequest> create(@RequestBody RecipeRequest req, Authentication authentication) {
-        req.setRequesterId(authentication.getName());
+        req.setRequesterId(ControllerAuthUtils.resolveRequiredUserId(authentication));
         req.setCreatedAt(LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.CREATED).body(requestService.createRequest(req));
+    }
+
+    // requires logged user
+    @GetMapping("/{id}")
+    public ResponseEntity<RecipeRequest> getById(@PathVariable String id, Authentication authentication) {
+        return ResponseEntity.ok(requestService.getRequestById(id, ControllerAuthUtils.resolveCurrentUserId(authentication)));
     }
 
     // requires logged user
     @GetMapping("/active")
     public ResponseEntity<List<RecipeRequest>> getActive(Authentication authentication) {
         // Service filtra createdAt > 30 dias atrás
-        return ResponseEntity.ok(requestService.getActiveRequests(authentication.getName()));
+        return ResponseEntity.ok(requestService.getActiveRequests(ControllerAuthUtils.resolveRequiredUserId(authentication)));
     }
 
     // requires logged user
@@ -47,8 +54,9 @@ public class RequestController {
             @PathVariable String id,
             @RequestBody RecipeRequestResponse response,
             Authentication authentication) {
-        response.setResponderId(authentication.getName());
-        requestService.respondToRequest(id, response);
+        String userId = ControllerAuthUtils.resolveRequiredUserId(authentication);
+        response.setResponderId(userId);
+        requestService.save(id, response, userId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

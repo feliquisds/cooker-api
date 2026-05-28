@@ -2,9 +2,9 @@ package com.expsn.cooker.controller;
 
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -45,7 +45,7 @@ public class RecipeController {
     @PostMapping
     public ResponseEntity<Recipe> create(@RequestBody Recipe recipe, Authentication authentication) {
         String userId = ControllerAuthUtils.resolveRequiredUserId(authentication);
-        return ResponseEntity.status(HttpStatus.CREATED).body(recipeService.createRecipe(recipe, userId));
+        return ResponseEntity.ok(recipeService.save(recipe, userId));
     }
 
     // does not require logged user, but if provided, show the recipe if it's public or if it's private and belongs to the user
@@ -59,6 +59,22 @@ public class RecipeController {
     public ResponseEntity<List<Review>> getReviewsByRecipeId(@PathVariable String id, Authentication authentication) {
         String userId = ControllerAuthUtils.resolveCurrentUserId(authentication);
         return ResponseEntity.ok(reviewService.getVisibleReviews(id, userId));
+    }
+
+    @PostMapping("/{id}/reviews")
+    public ResponseEntity<Review> createReview(
+            @PathVariable String id,
+            @RequestBody Review review,
+            Authentication authentication) {
+        String userId = ControllerAuthUtils.resolveRequiredUserId(authentication);
+        return ResponseEntity.ok(reviewService.save(id, review, userId));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable String id, Authentication authentication) {
+        String userId = ControllerAuthUtils.resolveRequiredUserId(authentication);
+        recipeService.delete(id, userId);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/favorited")

@@ -2,9 +2,9 @@ package com.expsn.cooker.controller;
 
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,8 +30,7 @@ public class RecipeBookController {
     @PostMapping
     public ResponseEntity<RecipeBook> create(@RequestBody RecipeBook book, Authentication authentication) {
         String userId = ControllerAuthUtils.resolveRequiredUserId(authentication);
-        book.setOwnerId(userId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(recipeBookService.save(book));
+        return ResponseEntity.ok(recipeBookService.save(book, userId));
     }
 
     // does not require logged user, but if provided, show the book if it's public or if it's private and belongs to the user
@@ -56,5 +55,12 @@ public class RecipeBookController {
     public ResponseEntity<List<RecipeBook>> getSavedBooks(Authentication authentication) {
         String userId = ControllerAuthUtils.resolveRequiredUserId(authentication);
         return ResponseEntity.ok(recipeBookService.getSavedBooks(userId));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable String id, Authentication authentication) {
+        String userId = ControllerAuthUtils.resolveRequiredUserId(authentication);
+        recipeBookService.delete(id, userId);
+        return ResponseEntity.ok().build();
     }
 }
