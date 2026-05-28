@@ -109,6 +109,9 @@ public class DataSeeder implements CommandLineRunner {
         meuLivro.setItems(List.of(temperosCategory));
         bookRepository.save(meuLivro);
 
+        rafa.setSavedBookIds(List.of(meuLivro.getId()));
+        userRepository.save(rafa);
+
         logger.info(">>> Banco de Dados COOKER populado com sucesso! <<<");
     }
 }
