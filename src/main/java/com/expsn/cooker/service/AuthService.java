@@ -66,7 +66,7 @@ public class AuthService {
             return buildAuthResponse(user);
 
         } catch (AuthenticationException ex) {
-            throw new BusinessException("Email ou senha inválidos");
+            throw new BusinessException("Email ou senha inválidos", ex);
         }
     }
 

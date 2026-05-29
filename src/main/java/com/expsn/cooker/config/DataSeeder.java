@@ -1,6 +1,7 @@
 package com.expsn.cooker.config;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -44,6 +45,7 @@ public class DataSeeder implements CommandLineRunner {
         logger.info(">>> CONECTADO AO BANCO: " + mongoTemplate.getDb().getName());
 
         User rafa = User.builder()
+                .id("69f809bbd6ac64744e5db1a0")
                 .handle("rafafafa")
                 .name("Rafael")
                 .email("rafael@cooker.com")
@@ -61,16 +63,21 @@ public class DataSeeder implements CommandLineRunner {
         rafa = userRepository.save(rafa);
 
         RecipeBook meuLivro = RecipeBook.builder()
+                .id("69f809bbd6ac64744e5db1a5")
                 .ownerId(rafa.getId())
                 .title("Receitas IV")
+                .tags(List.of("temperos"))
                 .descriptionMD("Meu objetivo aqui é ensinar que qualquer um (sim, até você!) pode aprender a cozinhar. Todas as receitas nesse site foram testadas e aprovadas por mim, então meticulosamente adaptadas e traduzidas (quando necessário).")
                 .isPublic(true)
                 .items(null)
                 .rating(0)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
                 .build();
         meuLivro = bookRepository.save(meuLivro);
 
         Recipe temperoVerde = Recipe.builder()
+                .id("69f809bbd6ac64744e5db1a1")
                 .authorId(rafa.getId())
                 .bookOriginId(meuLivro.getId())
                 .title("Tempero verde")

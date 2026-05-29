@@ -73,7 +73,7 @@ public class RecipeService {
         return savedRecipe;
     }
 
-    public Recipe updateRecipe(String recipeId, Recipe updatedData, String userId) {
+    public Recipe update(String recipeId, Recipe updatedData, String userId) {
         Recipe existing = recipeRepository.findById(recipeId)
             .orElseThrow(() -> new ItemException("Receita não encontrada"));
 
