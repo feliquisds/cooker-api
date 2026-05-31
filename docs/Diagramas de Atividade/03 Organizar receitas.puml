@@ -1,0 +1,19 @@
+@startuml
+title Organizar receitas sem um sistema centralizado
+
+start
+:Juntar receitas espalhadas em papéis, mensagens e imagens;
+:Separar por tipo, ocasião ou ordem pessoal;
+:Reescrever ou copiar as receitas mais usadas;
+
+if (A organização ficou clara?) then (Sim)
+  :Guardar em um caderno, pasta ou arquivo pessoal;
+else (Não)
+  :Reorganizar categorias e eliminar duplicidades;
+  :Tentar uma nova estrutura de classificação;
+endif
+
+:Manter apenas as versões mais úteis;
+stop
+
+@enduml

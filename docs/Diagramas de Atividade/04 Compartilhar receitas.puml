@@ -1,0 +1,19 @@
+@startuml
+title Compartilhar receitas sem um sistema centralizado
+
+start
+:Escolher uma receita que vale a pena dividir;
+:Selecionar fotos, texto e observações de preparo;
+:Enviar para uma pessoa, grupo ou rede social;
+
+if (A outra pessoa entendeu?) then (Sim)
+  :Receber retorno e eventuais ajustes;
+else (Não)
+  :Explicar melhor ingredientes, medidas e etapas;
+  :Enviar uma versão revisada;
+endif
+
+:Guardar a interação como referência para o futuro;
+stop
+
+@enduml

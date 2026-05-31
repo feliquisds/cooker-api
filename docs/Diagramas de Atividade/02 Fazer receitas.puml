@@ -1,0 +1,20 @@
+@startuml
+title Fazer receitas sem um sistema centralizado
+
+start
+:Escolher uma receita para preparar;
+:Separar ingredientes disponíveis em casa;
+:Comparar o que existe com o que a receita exige;
+
+if (Faltam ingredientes?) then (Sim)
+  :Substituir itens ou sair para comprar;
+else (Não)
+  :Seguir o preparo com o que já existe;
+endif
+
+:Executar o passo a passo com atenção;
+:Ajustar tempo, tempero e porções durante o preparo;
+:Registrar mentalmente o que funcionou melhor;
+stop
+
+@enduml

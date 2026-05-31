@@ -1,0 +1,22 @@
+@startuml
+title Encontrar receitas sem um sistema centralizado
+
+start
+:Perceber que deseja preparar uma receita específica;
+:Lembrar de possíveis fontes de consulta;
+:Procurar em cadernos, conversas, fotos e anotações soltas;
+
+if (A receita foi encontrada?) then (Sim)
+  :Ler ingredientes e modo de preparo;
+  :Adaptar quantidades com base na memória ou no improviso;
+  :Preparar a receita;
+else (Não)
+  :Tentar refazer a busca em outra fonte;
+  :Perguntar a familiares, amigos ou grupos;
+  :Anotar uma versão aproximada para usar depois;
+endif
+
+:Guardar o que foi descoberto para usos futuros;
+stop
+
+@enduml
