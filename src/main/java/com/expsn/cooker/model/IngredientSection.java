@@ -11,5 +11,5 @@ import lombok.Data;
 @AllArgsConstructor
 public class IngredientSection {
     private String title; // null or "default" for single-list recipes
-    private List<Ingredient> ingredients;
+    private List<String> ingredients;
 }

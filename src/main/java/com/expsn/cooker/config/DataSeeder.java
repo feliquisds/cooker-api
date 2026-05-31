@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import com.expsn.cooker.model.Category;
 import com.expsn.cooker.model.Difficulty;
-import com.expsn.cooker.model.Ingredient;
 import com.expsn.cooker.model.IngredientSection;
 import com.expsn.cooker.model.Recipe;
 import com.expsn.cooker.model.RecipeBook;
@@ -91,10 +90,10 @@ public class DataSeeder implements CommandLineRunner {
                         IngredientSection.builder()
                                 .title(null)
                                 .ingredients(List.of(
-                                        new Ingredient(2, null, "cebolas"),
-                                        new Ingredient(1, null, "pimentão verde"),
-                                        new Ingredient(5, "dentes", "de alho"),
-                                        new Ingredient(100, "g", "de cheiro verde (salsinha e cebolinha em partes iguais)")
+                                        "2 cebolas",
+                                        "1 pimentão verde",
+                                        "5 dentes de alho",
+                                        "100 g de cheiro verde (salsinha e cebolinha em partes iguais)"
                                 ))
                                 .build()
                 ))
