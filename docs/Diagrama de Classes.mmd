@@ -1,0 +1,162 @@
+classDiagram
+direction LR
+
+class User {
+  +String id
+  +String handle
+  +String name
+  +String email
+  +String password
+  +String avatarUrl
+  +String bio
+  +LocalDate birthDate
+  +boolean isPrivate
+  +List~String~ recipeNotificationTags
+  +List~String~ requestNotificationTags
+  +List~String~ favoriteRecipeIds
+  +List~String~ savedBookIds
+  +double rating
+}
+
+class Recipe {
+  +String id
+  +String authorId
+  +String bookOriginId
+  +String title
+  +List~String~ images
+  +List~String~ tags
+  +Difficulty difficulty
+  +Integer timeMinutes
+  +Integer portions
+  +String descriptionMD
+  +List~IngredientSection~ ingredientSections
+  +List~String~ stepsMD
+  +boolean isPublic
+  +LocalDateTime createdAt
+  +LocalDateTime updatedAt
+  +double rating
+}
+
+class Text {
+  +String id
+  +String authorId
+  +String bookOriginId
+  +String title
+  +List~String~ tags
+  +String contentMD
+  +boolean isPublic
+  +LocalDateTime createdAt
+  +LocalDateTime updatedAt
+  +double rating
+}
+
+class RecipeBook {
+  +String id
+  +String ownerId
+  +String title
+  +String descriptionMD
+  +List~String~ tags
+  +boolean isPublic
+  +List~BookComponent~ items
+  +LocalDateTime createdAt
+  +LocalDateTime updatedAt
+  +double rating
+}
+
+class RecipeRequest {
+  +String id
+  +String requesterId
+  +String title
+  +String descriptionMD
+  +List~String~ tags
+  +List~RecipeRequestResponse~ responses
+  +LocalDateTime createdAt
+  +boolean manuallyClosed
+  +boolean isActive()
+}
+
+class RecipeRequestResponse {
+  +String responderId
+  +String recipeId
+  +String messageMD
+  +LocalDateTime createdAt
+}
+
+class Review {
+  +String id
+  +String targetId
+  +String authorId
+  +String title
+  +String contentMD
+  +List~String~ images
+  +Integer rating
+  +Status aiStatus
+}
+
+class BookComponent {
+  <<abstract>>
+}
+
+class RecipeRef {
+  +String recipeId
+  +String title
+}
+
+class TextRef {
+  +String textId
+  +String title
+}
+
+class Category {
+  +String name
+  +List~BookComponent~ items
+}
+
+class IngredientSection {
+  +String title
+  +List~String~ ingredients
+}
+
+class Difficulty {
+  <<enumeration>>
+  EASY
+  MEDIUM
+  HARD
+}
+
+class Status {
+  <<enumeration>>
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+BookComponent <|-- RecipeRef
+BookComponent <|-- TextRef
+BookComponent <|-- Category
+
+Recipe "1" o-- "0..*" IngredientSection : ingredientSections
+RecipeBook "1" o-- "0..*" BookComponent : items
+Category "1" o-- "0..*" BookComponent : items
+RecipeRequest "1" o-- "0..*" RecipeRequestResponse : responses
+
+Recipe ..> User : authorId
+Recipe ..> RecipeBook : bookOriginId
+Recipe ..> Difficulty
+RecipeRef ..> Recipe : recipeId
+
+Text ..> User : authorId
+Text ..> RecipeBook : bookOriginId
+
+RecipeBook ..> User : ownerId
+
+RecipeRequest ..> User : requesterId
+RecipeRequestResponse ..> User : responderId
+RecipeRequestResponse ..> Recipe : recipeId
+
+Review ..> User : authorId
+Review ..> Recipe : targetId
+Review ..> Text : targetId
+Review ..> Status
+
+TextRef ..> Text : textId

@@ -1,0 +1,146 @@
+erDiagram
+  USER {
+    string _id
+    string handle
+    string name
+    string email
+    string password
+    string avatarUrl
+    string bio
+    date birthDate
+    boolean isPrivate
+    string[] recipeNotificationTags
+    string[] requestNotificationTags
+    string[] favoriteRecipeIds
+    string[] savedBookIds
+    decimal rating
+  }
+
+  RECIPE {
+    string _id
+    string authorId
+    string bookOriginId
+    string title
+    string[] images
+    string[] tags
+    string difficulty
+    int timeMinutes
+    int portions
+    string descriptionMD
+    string ingredientSections
+    string[] stepsMD
+    boolean isPublic
+    datetime createdAt
+    datetime updatedAt
+    decimal rating
+  }
+
+  INGREDIENT_SECTION {
+    string title
+    string[] ingredients
+  }
+
+  TEXT {
+    string _id
+    string authorId
+    string bookOriginId
+    string title
+    string[] tags
+    string contentMD
+    boolean isPublic
+    datetime createdAt
+    datetime updatedAt
+    decimal rating
+  }
+
+  RECIPE_BOOK {
+    string _id
+    string ownerId
+    string title
+    string descriptionMD
+    string[] tags
+    boolean isPublic
+    string[] items
+    datetime createdAt
+    datetime updatedAt
+    decimal rating
+  }
+
+  BOOK_COMPONENT {
+    string type
+  }
+
+  RECIPE_REF {
+    string recipeId
+    string title
+  }
+
+  TEXT_REF {
+    string textId
+    string title
+  }
+
+  CATEGORY {
+    string name
+    string[] items
+  }
+
+  RECIPE_REQUEST {
+    string _id
+    string requesterId
+    string title
+    string descriptionMD
+    string[] tags
+    datetime createdAt
+    boolean manuallyClosed
+    string[] responses
+  }
+
+  RECIPE_REQUEST_RESPONSE {
+    string responderId
+    string recipeId
+    string messageMD
+    datetime createdAt
+  }
+
+  REVIEW {
+    string _id
+    string targetId
+    string authorId
+    string title
+    string contentMD
+    string[] images
+    int rating
+    string aiStatus
+  }
+
+  DIFFICULTY {
+    string value
+  }
+
+  STATUS {
+    string value
+  }
+
+  USER ||--o{ RECIPE : references
+  USER ||--o{ TEXT : references
+  USER ||--o{ RECIPE_BOOK : owns
+  USER ||--o{ RECIPE_REQUEST : creates
+  USER ||--o{ RECIPE_REQUEST_RESPONSE : writes
+  USER ||--o{ REVIEW : writes
+
+  RECIPE_BOOK ||--o{ BOOK_COMPONENT : embeds
+  CATEGORY ||--o{ BOOK_COMPONENT : embeds
+  RECIPE ||--o{ RECIPE_REF : embeds
+  TEXT ||--o{ TEXT_REF : embeds
+
+  RECIPE ||--o{ INGREDIENT_SECTION : embeds
+  RECIPE_REQUEST ||--o{ RECIPE_REQUEST_RESPONSE : embeds
+  RECIPE ||--o{ DIFFICULTY : uses
+  RECIPE ||--o{ REVIEW : referenced_by
+  TEXT ||--o{ REVIEW : referenced_by
+  REVIEW ||--o{ STATUS : uses
+
+  %% MongoDB-oriented view: top-level entities are collections, and nested objects are embedded documents or arrays.
+  %% BookComponent is a polymorphic embedded model with subtypes RecipeRef, TextRef, and Category.
+  %% Enum-like values such as Difficulty and Status are scalar fields stored inside the documents.
