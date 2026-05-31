@@ -4,7 +4,7 @@ Realiza autenticação de usuário
 **Descrição:** Exibe a autenticação de um usuário por meio de credenciais  
 **Pré-condições:** Usuário deve ter uma conta cadastrada  
 **Pós-condições:** Usuário é autenticado  
-**Referências:** RF01, RNF02, RNF03, RN01, RN02  
+**Referências:** RF01, RNF02, RNF03  
 
 **Fluxo básico:**  
     1. Usuário informa email e senha  
@@ -12,7 +12,7 @@ Realiza autenticação de usuário
     3. Usuário é autenticado  
 
 **Fluxos alternativos:**  
-    **Usuário quer se registrar:**  
+    **Registro de conta:**  
         1. Usuário acessa tela de cadastro  
         2. Usuário preenche informações de cadastro  
         3. Sistema valida os dados  
