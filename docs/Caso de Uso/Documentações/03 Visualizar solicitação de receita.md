@@ -19,4 +19,4 @@ Apresenta detalhes de uma solicitação de receita
 **Fluxos de exceção:**
     **Perfil/solicitação de receita privado:**
         1. Fluxo é interrompido
-        2. É exibido mensagem de erro "solicitação de receita privada"
+        2. É exibido mensagem de erro apropriada

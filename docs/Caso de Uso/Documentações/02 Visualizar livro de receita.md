@@ -12,11 +12,11 @@ Apresenta detalhes de um livro de receita
     3. Informações são apresentadas ao usuário final
 
 **Fluxos alternativos:**
-    **Usuário é dono do livro de receita:**
+    **Usuário é autor do livro de receita:**
         1. Fluxo segue normalmente
-        2. Um botão de editar perfil é adicionado
+        2. Um botão de editar é adicionado
 
 **Fluxos de exceção:**
     **Perfil/livro de receita privado:**
         1. Fluxo é interrompido
-        2. É exibido mensagem de erro "livro de receita privado"
+        2. É exibido mensagem de erro apropriada

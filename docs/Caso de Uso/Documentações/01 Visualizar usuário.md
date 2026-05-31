@@ -7,7 +7,7 @@ Apresenta detalhes de um usuário
 **Referências:** RF01, RF09, RNF02, RNF03, RN03, RN04
 
 **Fluxo básico:**
-    1. Usuário acessa/pesquisa o perfil de outro usuário
+    1. Usuário acessa/pesquisa um perfil de outro usuário
     2. Sistema obtém dados e filtra dados sensíveis
     3. Informações são apresentadas ao usuário final
 
@@ -19,4 +19,4 @@ Apresenta detalhes de um usuário
 **Fluxos de exceção:**
     **Perfil privado:**
         1. Fluxo é interrompido
-        2. É exibido mensagem de erro "perfil privado"
+        2. É exibido mensagem de erro apropriada
