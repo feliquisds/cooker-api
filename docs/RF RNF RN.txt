@@ -4,7 +4,7 @@ RF03 – O sistema deve permitir manter (criar, atualizar, visualizar, apagar) t
 RF04 – O sistema deve permitir manter (criar, atualizar, visualizar, apagar) livros de receitas
 RF05 – O sistema deve permitir favoritar itens (receitas, textos, livros)
 RF06 – O sistema deve permitir exportar receitas/textos em PDF
-RF07 – O sistema deve permitir criação de reviews
+RF07 – O sistema deve permitir manter (criar, visualizar) reviews
 RF08 – O sistema deve permitir manter (criar, responder, visualizar) solicitações de receitas
 RF09 – O sistema deve permitir pesquisa com filtros de itens (usuários, receitas, textos, livros, solicitações)
 RF10 – O sistema deve permitir configurar privacidade do conteúdo (usuário, receitas, textos, livros)
