@@ -13,8 +13,7 @@ RF11 – O sistema deve enviar notificações por email
 RNF01 – O sistema deve incluir QR Code (apontando ao URL) no PDF exportado de uma receita pública
 RNF02 – O sistema deve garantir segurança dos dados (criptografia, privacidade)
 RNF03 – O sistema deve ter tempo de resposta inferior a 2 segundos
-RNF04 – O sistema deve oferecer tema claro, escuro e automático
-RNF05 – O sistema deve fechar solicitações de receita após 30 dias
+RNF04 – O sistema deve fechar solicitações de receita após 30 dias
 
 RN01 – Apenas o criador pode editar seus conteúdos
 RN02 – Usuários sem conta não podem criar conteúdo

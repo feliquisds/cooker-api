@@ -4,7 +4,7 @@ Apresenta detalhes de uma solicitação de receita
 **Descrição:** Exibe informações de uma solicitação de receita, como descrição, autor, e respostas  
 **Pré-condições:** Solicitação de receita a ser visualizada deve existir  
 **Pós-condições:** Informações da solicitação de receita são apresentadas  
-**Referências:** RF08, RF09, RNF02, RNF03, RNF05, RN03, RN04  
+**Referências:** RF08, RF09, RNF02, RNF03, RNF04, RN03, RN04  
 
 **Fluxo básico:**  
     1. Usuário acessa/pesquisa uma solicitação de receita  

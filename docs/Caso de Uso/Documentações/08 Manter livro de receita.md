@@ -9,7 +9,7 @@ Realiza manutenção de livro de receita
 **Fluxo básico:**  
     1. Usuário acessa a tela de criação/edição do livro  
     2. Sistema apresenta campos preenchíveis  
-    3. Usuário informa informações  
+    3. Usuário preenche informações  
     4. Sistema salva o livro  
 
 **Fluxos alternativos:**  

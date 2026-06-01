@@ -11,3 +11,4 @@ Realiza criação de solicitação de receita
     2. Sistema apresenta o formulário  
     3. Usuário informa os dados da solicitação  
     4. Sistema salva a solicitação  
+    5. Sistema prepara notificação
