@@ -17,6 +17,6 @@ Apresenta detalhes de uma solicitação de receita
         2. Um campo de adicionar resposta é adicionado  
 
 **Fluxos de exceção:**  
-    **Perfil/solicitação de receita privado:**  
+    **Perfil privado:**  
         1. Fluxo é interrompido  
         2. É exibido mensagem de erro apropriada  

@@ -1,7 +1,7 @@
 Realiza criação de respostas para solicitações de receita
 
 **Atores:** Usuário logado  
-**Descrição:** Exibe a criação de respostas para uma solicitação de receita  
+**Descrição:** Realiza a criação de respostas para uma solicitação de receita  
 **Pré-condições:** Solicitação de receita deve existir  
 **Pós-condições:** Resposta é adicionada à solicitação  
 **Referências:** RF02, RF03, RF08, RNF02, RNF03, RN02, RN03, RN04, RN05  

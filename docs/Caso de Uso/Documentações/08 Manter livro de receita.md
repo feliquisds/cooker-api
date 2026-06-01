@@ -1,7 +1,7 @@
 Realiza manutenção de livro de receita
 
 **Atores:** Usuário logado  
-**Descrição:** Permite criar, atualizar, ou apagar um livro de receita  
+**Descrição:** Realiza a criação, atualização, ou exclusão de um livro de receita  
 **Pré-condições:** Usuário deve estar autenticado; para alterar/apagar, deve ser o autor do livro  
 **Pós-condições:** Livro de receita é criado, atualizado, ou removido conforme ação  
 **Referências:** RF04, RF09, RF10, RNF02, RNF03, RN01, RN02, RN03, RN04, RN05  

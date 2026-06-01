@@ -1,7 +1,7 @@
 Realiza recuperação de senha
 
 **Atores:** Usuário não logado  
-**Descrição:** Exibe a recuperação de acesso à conta por meio de um link enviado por email  
+**Descrição:** Realiza a recuperação de acesso à conta por meio de um link enviado por email  
 **Pré-condições:** Usuário deve ter uma conta cadastrada  
 **Pós-condições:** Usuário pode redefinir a senha  
 **Referências:** RF01, RF11, RNF02, RNF03  

@@ -1,7 +1,7 @@
 Apresenta edição do perfil
 
 **Atores:** Usuário logado  
-**Descrição:** Exibe a edição dos dados do próprio perfil  
+**Descrição:** Realiza a edição dos dados do próprio perfil  
 **Pré-condições:** Usuário deve estar autenticado  
 **Pós-condições:** Dados do perfil são atualizados  
 **Referências:** RF01, RF10, RNF02, RNF03, RN01, RN03, RN04  

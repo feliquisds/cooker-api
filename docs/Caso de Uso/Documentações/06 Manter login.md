@@ -1,7 +1,7 @@
 Realiza autenticação de usuário
 
 **Atores:** Usuário não logado  
-**Descrição:** Exibe a autenticação de um usuário por meio de credenciais  
+**Descrição:** Realiza a autenticação de um usuário por meio de credenciais  
 **Pré-condições:** Usuário deve ter uma conta cadastrada  
 **Pós-condições:** Usuário é autenticado  
 **Referências:** RF01, RNF02, RNF03  
