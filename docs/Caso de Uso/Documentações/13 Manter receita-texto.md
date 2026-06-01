@@ -4,7 +4,7 @@ Realiza manutenção de receita-texto
 **Descrição:** Realiza a criação, atualização, ou exclusão de uma receita ou texto  
 **Pré-condições:** Usuário deve estar autenticado; para atualizar/apagar, deve ser o autor do item  
 **Pós-condições:** Receita ou texto é criado, atualizado, ou removido conforme ação  
-**Referências:** RF02, RF03, RNF01, RNF02, RNF03, RN01, RN03, RN04  
+**Referências:** RF02, RF03, RNF02, RNF03, RN01, RN03, RN04  
 
 **Fluxo básico:**  
     1. Usuário acessa a criação/edição da receita ou texto  
