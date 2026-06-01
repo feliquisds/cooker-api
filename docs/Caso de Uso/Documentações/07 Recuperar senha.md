@@ -19,4 +19,4 @@ Realiza recuperação de senha
 **Fluxos de exceção:**  
     **Link expirado:**  
         1. Fluxo é interrompido  
-        2. É solicitado um novo link de recuperação  
+        2. É exibida mensagem de erro apropriada  
