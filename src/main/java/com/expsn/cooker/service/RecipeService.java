@@ -47,6 +47,7 @@ public class RecipeService {
     }
 
     public Recipe save(Recipe recipe, String userId) {
+        var editing = recipe.getId() != null;
         RecipeBook book = recipeBookRepository.findById(recipe.getBookOriginId())
                 .orElseThrow(() -> new ItemException("Livro de receita não encontrado"));
 
@@ -54,15 +55,10 @@ public class RecipeService {
             throw new BusinessException("Acesso negado a esta receita");
         }
 
-        if (recipe.getId() != null) {
-            Recipe existing = recipeRepository.findById(recipe.getId())
-                    .orElseThrow(() -> new ItemException("Receita não encontrada"));
-            if (!existing.getAuthorId().equals(userId)) {
-                throw new BusinessException("Você não tem permissão para editar esta receita");
-            }
-            recipe.setCreatedAt(existing.getCreatedAt());
-        } else {
+        if (!editing) {
+            recipe.setBookOriginId(book.getId());
             recipe.setCreatedAt(LocalDateTime.now());
+            recipe.setRating(0);
         }
 
         recipe.setAuthorId(userId);

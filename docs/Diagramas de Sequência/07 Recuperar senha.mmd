@@ -17,10 +17,11 @@ sequenceDiagram
 
     S->>+R: findByEmail(String email)
     R-->>-S: User
-    break Email não existe
-        S-->>C: Exception
-        C-->>F: HTTP 412
-        F-->>U: Email não existe
+    alt Email não existe
+        Note right of S: Nada a fazer
+        S-->>C: void
+        C-->>F: HTTP 200
+        F-->>U: Email de recuperação enviado
     end
 
     S->>+E: sendRecoveryEmail(String email)

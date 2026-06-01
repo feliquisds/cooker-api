@@ -1,5 +1,6 @@
 package com.expsn.cooker.service;
 
+import com.expsn.cooker.client.NotificationClient;
 import com.expsn.cooker.exception.BusinessException;
 import com.expsn.cooker.exception.ItemException;
 import com.expsn.cooker.model.User;
@@ -18,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -27,14 +29,15 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
+    private final NotificationClient notificationClient;
 
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new BusinessException("Email is already registered", org.springframework.http.HttpStatus.BAD_REQUEST);
+            throw new BusinessException("Email já cadastrado");
         }
 
         if (userRepository.findByHandle(request.getHandle()).isPresent()) {
-            throw new BusinessException("Handle is already taken", org.springframework.http.HttpStatus.BAD_REQUEST);
+            throw new BusinessException("Nome de usuário já cadastrado");
         }
 
         User user = User.builder()
@@ -83,5 +86,13 @@ public class AuthService {
                 .name(user.getName())
                 .userId(user.getId())
                 .build();
+    }
+
+    public void recover(String email) {
+        Optional<User> user = userRepository.findByEmail(email);
+        
+        if (user.isPresent()) {
+            notificationClient.sendRecoveryEmail(user.get().getEmail());
+        }
     }
 }

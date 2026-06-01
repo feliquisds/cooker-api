@@ -19,6 +19,23 @@ sequenceDiagram
     end
 
     C->>+S: save(User user, String userId)
+
+    S->>+R: findByEmail(String email)
+    R-->>-S: User
+    break Email existe
+        S-->>C: Exception
+        C-->>F: HTTP 412
+        F-->>U: Email já cadastrado
+    end
+
+    S->>+R: findByHandle(String handle)
+    R-->>-S: User
+    break Nome de usuário existe
+        S-->>C: Exception
+        C-->>F: HTTP 412
+        F-->>U: Nome de usuário já cadastrado
+    end
+
     S->>+R: save(User user)
     R-->>-S: User
     S-->>-C: User

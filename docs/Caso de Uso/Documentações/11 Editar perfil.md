@@ -13,6 +13,6 @@ Apresenta edição do perfil
     4. Sistema salva as alterações  
 
 **Fluxos de exceção:**  
-    **Dados inválidos:**  
+    **Email/nome de usuário já existe:**  
         1. Fluxo é interrompido  
         2. É exibido mensagem de erro apropriada  

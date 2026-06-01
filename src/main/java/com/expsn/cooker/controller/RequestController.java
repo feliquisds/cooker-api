@@ -27,28 +27,27 @@ public class RequestController {
 
     private final RequestService requestService;
 
-    // requires logged user
     @PostMapping
     public ResponseEntity<RecipeRequest> create(@RequestBody RecipeRequest req, Authentication authentication) {
-        req.setRequesterId(ControllerAuthUtils.resolveRequiredUserId(authentication));
-        req.setCreatedAt(LocalDateTime.now());
-        return ResponseEntity.status(HttpStatus.CREATED).body(requestService.createRequest(req));
+        String userId = ControllerAuthUtils.resolveRequiredUserId(authentication);
+        var body = requestService.createRequest(req, userId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(body);
     }
 
-    // requires logged user
     @GetMapping("/{id}")
     public ResponseEntity<RecipeRequest> getById(@PathVariable String id, Authentication authentication) {
-        return ResponseEntity.ok(requestService.getRequestById(id, ControllerAuthUtils.resolveCurrentUserId(authentication)));
+        String userId = ControllerAuthUtils.resolveCurrentUserId(authentication);
+        return ResponseEntity.ok(requestService.getRequestById(id, userId));
     }
 
     // requires logged user
     @GetMapping("/active")
     public ResponseEntity<List<RecipeRequest>> getActive(Authentication authentication) {
+        String userId = ControllerAuthUtils.resolveRequiredUserId(authentication);
         // Service filtra createdAt > 30 dias atrás
-        return ResponseEntity.ok(requestService.getActiveRequests(ControllerAuthUtils.resolveRequiredUserId(authentication)));
+        return ResponseEntity.ok(requestService.getActiveRequests(userId));
     }
 
-    // requires logged user
     @PostMapping("/{id}/respond")
     public ResponseEntity<Void> respond(
             @PathVariable String id,
@@ -56,7 +55,7 @@ public class RequestController {
             Authentication authentication) {
         String userId = ControllerAuthUtils.resolveRequiredUserId(authentication);
         response.setResponderId(userId);
-        requestService.save(id, response, userId);
+        requestService.respond(id, response, userId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

@@ -12,10 +12,12 @@ import org.springframework.stereotype.Service;
 import com.expsn.cooker.client.AIClient;
 import com.expsn.cooker.exception.BusinessException;
 import com.expsn.cooker.model.Recipe;
+import com.expsn.cooker.model.RecipeBook;
 import com.expsn.cooker.model.Review;
 import com.expsn.cooker.model.User;
 import com.expsn.cooker.exception.ItemException;
 import com.expsn.cooker.model.Status;
+import com.expsn.cooker.repository.RecipeBookRepository;
 import com.expsn.cooker.repository.RecipeRepository;
 import com.expsn.cooker.repository.ReviewRepository;
 import com.expsn.cooker.repository.UserRepository;
@@ -28,6 +30,7 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final RecipeRepository recipeRepository;
+    private final RecipeBookRepository recipeBookRepository;
     private final UserRepository userRepository;
     private final MongoTemplate mongoTemplate;
     private final AIClient aiClient;
@@ -35,10 +38,8 @@ public class ReviewService {
     public Review save(String recipeId, Review review, String userId) {
         Recipe recipe = recipeRepository.findById(recipeId)
                 .orElseThrow(() -> new ItemException("Receita não encontrada"));
-        User recipeAuthor = userRepository.findById(recipe.getAuthorId())
-                .orElseThrow(() -> new ItemException("Autor da receita não encontrado"));
 
-        if (userId == null || (!isRecipePubliclyVisible(recipe, recipeAuthor) && !recipeAuthor.getId().equals(userId))) {
+        if (!isRecipePubliclyVisible(recipe)) {
             throw new BusinessException("Acesso negado a esta receita");
         }
 
@@ -50,7 +51,7 @@ public class ReviewService {
 
         review.setTargetId(recipeId);
         review.setAuthorId(userId);
-        review.setAiStatus(Status.APPROVED);
+        review.setAiStatus(Status.PENDING);
 
         Review savedReview = reviewRepository.save(review);
         aiClient.queueForAnalysis(savedReview);
@@ -61,35 +62,32 @@ public class ReviewService {
     public List<Review> getVisibleReviews(String recipeId, String currentUserId) {
         Recipe recipe = recipeRepository.findById(recipeId)
                 .orElseThrow(() -> new ItemException("Receita não encontrada"));
+        RecipeBook recipeBook = recipeBookRepository.findById(recipe.getBookOriginId())
+                .orElseThrow(() -> new ItemException("Livro de receitas não encontrado"));
         User recipeAuthor = userRepository.findById(recipe.getAuthorId())
                 .orElseThrow(() -> new ItemException("Autor da receita não encontrado"));
 
-        if (isRecipePubliclyVisible(recipe, recipeAuthor)) {
-            return reviewRepository.findByTargetIdAndAiStatus(recipeId, Status.APPROVED);
-        }
-
-        if (currentUserId == null) {
+        if ((recipeAuthor.isPrivate() || !recipe.isPublic() || !recipeBook.isPublic()) &&
+            (currentUserId == null || !recipeAuthor.getId().equals(currentUserId))) {
             throw new BusinessException("Acesso negado a esta receita");
         }
 
-        if (currentUserId.equals(recipe.getAuthorId())) {
-            return reviewRepository.findByTargetIdAndAiStatus(recipeId, Status.APPROVED);
-        }
-
-        return reviewRepository.findByTargetIdAndAuthorId(recipeId, currentUserId);
+        return reviewRepository.findByTargetIdAndAiStatus(recipeId, Status.APPROVED);
     }
 
     public List<Review> getReviewsByUserId(String userId) {
         return reviewRepository.findByAuthorIdAndAiStatus(userId, Status.APPROVED);
     }
 
+    public List<Review> getMyReviews(String userId) {
+        return reviewRepository.findByAuthorId(userId);
+    }
+
     public List<Review> getReviewsForRecipe(String recipeId) {
         Recipe recipe = recipeRepository.findById(recipeId)
             .orElseThrow(() -> new ItemException("Receita não encontrada"));
-        User recipeAuthor = userRepository.findById(recipe.getAuthorId())
-            .orElseThrow(() -> new ItemException("Autor da receita não encontrado"));
 
-        if (!isRecipePubliclyVisible(recipe, recipeAuthor)) {
+        if (!isRecipePubliclyVisible(recipe)) {
             return Collections.emptyList();
         }
 
@@ -137,7 +135,11 @@ public class ReviewService {
         recipeRepository.save(recipe);
     }
 
-    private boolean isRecipePubliclyVisible(Recipe recipe, User author) {
-        return recipe.isPublic() && !author.isPrivate();
+    private boolean isRecipePubliclyVisible(Recipe recipe) {
+        var originBook = recipeBookRepository.findById(recipe.getBookOriginId())
+                .orElseThrow(() -> new ItemException("Livro de receitas não encontrado"));
+        var user = userRepository.findById(recipe.getAuthorId())
+                .orElseThrow(() -> new ItemException("Autor da receita não encontrado"));
+        return recipe.isPublic() && !user.isPrivate() && originBook.isPublic();
     }
 }

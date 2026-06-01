@@ -26,17 +26,14 @@ public class RecipeBookController {
 
     private final RecipeBookService recipeBookService;
 
-    // requires logged user
     @PostMapping
-    public ResponseEntity<RecipeBook> create(@RequestBody RecipeBook book, Authentication authentication) {
+    public ResponseEntity<RecipeBook> save(@RequestBody RecipeBook book, Authentication authentication) {
         String userId = ControllerAuthUtils.resolveRequiredUserId(authentication);
         return ResponseEntity.ok(recipeBookService.save(book, userId));
     }
 
-    // does not require logged user, but if provided, show the book if it's public or if it's private and belongs to the user
     @GetMapping("/{id}")
     public ResponseEntity<RecipeBook> getBookById(@PathVariable String id, Authentication authentication) {
-        // Aqui a Service deve retornar o livro com os nomes das receitas hidratados
         String userId = ControllerAuthUtils.resolveCurrentUserId(authentication);
         return ResponseEntity.ok(recipeBookService.getBookById(id, userId));
     }

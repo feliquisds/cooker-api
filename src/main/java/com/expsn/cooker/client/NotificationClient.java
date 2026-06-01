@@ -26,4 +26,9 @@ public class NotificationClient {
             return;
         }
     }
+
+    public void sendRecoveryEmail(String email) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'sendRecoveryEmail'");
+    }
 }

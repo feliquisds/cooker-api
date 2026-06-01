@@ -21,6 +21,10 @@ Realiza manutenção de receita-texto
         4. Sistema apaga o item  
 
 **Fluxos de exceção:**  
+    **Livro de receita de origem não encontrado:**  
+        1. Fluxo é interrompido  
+        2. É exibida mensagem de erro apropriada  
+    
     **Usuário não autorizado:**  
         1. Fluxo é interrompido  
         2. É exibida mensagem de erro apropriada  

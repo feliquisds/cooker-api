@@ -1,5 +1,6 @@
 package com.expsn.cooker.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -36,21 +37,25 @@ public class RecipeBookService {
     private final UserService userService;
 
     public RecipeBook save(RecipeBook book, String userId) {
-        if (book.getId() != null) {
+        var editing = book.getId() != null;
+        if (editing) {
             RecipeBook existing = recipeBookRepository.findById(book.getId())
                     .orElseThrow(() -> new ItemException("Livro de receita não encontrado"));
 
             if (!existing.getOwnerId().equals(userId)) {
                 throw new BusinessException("Acesso negado a este livro");
             }
-
-            book.setOwnerId(existing.getOwnerId());
         } else {
+            book.setCreatedAt(LocalDateTime.now());
+            book.setUpdatedAt(LocalDateTime.now());
             book.setOwnerId(userId);
+            book.setRating(0);
         }
 
-        RecipeBook savedBook = mongoTemplate.save(book);
-        userService.addRecipeBookToSaved(savedBook.getOwnerId(), savedBook.getId());
+        RecipeBook savedBook = recipeBookRepository.save(book);
+        if (!editing) {
+            userService.addRecipeBookToSaved(userId, savedBook.getId());
+        }
         return savedBook;
     }
 

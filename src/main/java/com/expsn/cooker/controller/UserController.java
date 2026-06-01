@@ -30,7 +30,6 @@ public class UserController {
     private final UserService userService;
     private final ReviewService reviewService;
 
-    // does not require logged user, but if provided, show the profile if userId is the same as the requested profile
     @GetMapping("/profile/{handle}")
     public ResponseEntity<UserPublic> getPublicProfile(
             @PathVariable String handle,
@@ -65,7 +64,7 @@ public class UserController {
     @GetMapping("/me/reviews")
     public ResponseEntity<List<Review>> getMyReviews(Authentication authentication) {
         String userId = ControllerAuthUtils.resolveRequiredUserId(authentication);
-        return ResponseEntity.ok(reviewService.getReviewsByUserId(userId));
+        return ResponseEntity.ok(reviewService.getMyReviews(userId));
     }
 
     @PostMapping("/me")

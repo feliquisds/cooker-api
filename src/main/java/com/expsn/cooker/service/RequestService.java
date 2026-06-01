@@ -11,7 +11,9 @@ import com.expsn.cooker.exception.BusinessException;
 import com.expsn.cooker.exception.ItemException;
 import com.expsn.cooker.model.RecipeRequest;
 import com.expsn.cooker.model.RecipeRequestResponse;
+import com.expsn.cooker.model.User;
 import com.expsn.cooker.repository.RequestRepository;
+import com.expsn.cooker.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,13 +22,12 @@ import lombok.RequiredArgsConstructor;
 public class RequestService {
 
     private final RequestRepository requestRepository;
+    private final UserRepository userRepository;
     private final NotificationClient notificationClient;
 
-    public RecipeRequest createRequest(RecipeRequest request) {
-        if (request.getResponses() == null) {
-            request.setResponses(new ArrayList<>());
-        }
-
+    public RecipeRequest createRequest(RecipeRequest request, String userId) {
+        request.setCreatedAt(LocalDateTime.now());
+        request.setRequesterId(userId);
         RecipeRequest saved = requestRepository.save(request);
         notificationClient.queueNotifyRequestInterest(saved);
         return saved;
@@ -35,19 +36,23 @@ public class RequestService {
     public RecipeRequest getRequestById(String id, String userId) {
         RecipeRequest request = requestRepository.findById(id)
                 .orElseThrow(() -> new ItemException("Solicitação não encontrada"));
+        User user = userRepository.findById(request.getRequesterId())
+                .orElseThrow(() -> new ItemException("Usuário solicitante não encontrado"));
 
-        if (userId != null && request.getRequesterId().equals(userId)) {
-            return request;
+        if (user.isPrivate() && (userId == null || !request.getRequesterId().equals(userId))) {
+            throw new BusinessException("Acesso negado a esta solicitação");
         }
 
-        throw new BusinessException("Acesso negado a esta solicitação");
+        return request;
     }
 
-    public RecipeRequestResponse save(String requestId, RecipeRequestResponse response, String userId) {
+    public RecipeRequestResponse respond(String requestId, RecipeRequestResponse response, String userId) {
         RecipeRequest request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new ItemException("Solicitação não encontrada"));
+        User user = userRepository.findById(request.getRequesterId())
+                .orElseThrow(() -> new ItemException("Usuário não encontrado"));
 
-        if (userId == null || request.getRequesterId().equals(userId)) {
+        if (user.isPrivate() && !request.getRequesterId().equals(userId)) {
             throw new BusinessException("Acesso negado a esta solicitação");
         }
 

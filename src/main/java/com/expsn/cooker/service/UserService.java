@@ -25,29 +25,27 @@ public class UserService {
     public User save(User updatedUser, String userId) {
         User existing = findById(userId);
 
-        if (updatedUser.getHandle() != null && !updatedUser.getHandle().equals(existing.getHandle())) {
+        if (updatedUser.getHandle() != existing.getHandle()) {
             userRepository.findByHandle(updatedUser.getHandle()).ifPresent(user -> {
-                if (!user.getId().equals(userId)) {
-                    throw new BusinessException("Handle is already taken", org.springframework.http.HttpStatus.BAD_REQUEST);
-                }
+                throw new BusinessException("Nome de usuário já cadastrado");
             });
-        }
-
-        if (updatedUser.getName() != null) {
-            existing.setName(updatedUser.getName());
-        }
-        if (updatedUser.getHandle() != null) {
             existing.setHandle(updatedUser.getHandle());
         }
-        if (updatedUser.getAvatarUrl() != null) {
-            existing.setAvatarUrl(updatedUser.getAvatarUrl());
+        if (updatedUser.getEmail() != existing.getEmail()) {
+            userRepository.findByEmail(updatedUser.getEmail()).ifPresent(user -> {
+                throw new BusinessException("Email já cadastrado");
+            });
+            existing.setEmail(updatedUser.getEmail());
         }
-        if (updatedUser.getBio() != null) {
-            existing.setBio(updatedUser.getBio());
-        }
-        if (updatedUser.getBirthDate() != null) {
-            existing.setBirthDate(updatedUser.getBirthDate());
-        }
+
+        existing.setName(updatedUser.getName());
+        existing.setHandle(updatedUser.getHandle());
+        existing.setAvatarUrl(updatedUser.getAvatarUrl());
+        existing.setBio(updatedUser.getBio());
+        existing.setBirthDate(updatedUser.getBirthDate());
+        existing.setRequestNotificationTags(updatedUser.getRequestNotificationTags());
+        existing.setRecipeNotificationTags(updatedUser.getRecipeNotificationTags());
+        existing.setPrivate(updatedUser.isPrivate());
 
         return userRepository.save(existing);
     }
@@ -98,9 +96,8 @@ public class UserService {
             () -> new ItemException("Usuário não encontrado")
         );
         
-        // Se o usuário for privado e não for o próprio dono vendo
         if (user.isPrivate() && !user.getId().equals(currentUserId)) {
-            throw new BusinessException("Este perfil é privado", org.springframework.http.HttpStatus.PRECONDITION_FAILED);
+            throw new BusinessException("Este perfil é privado");
         }
         
         return new UserPublic(user.getName(), user.getHandle(), user.getBio(), user.getAvatarUrl());

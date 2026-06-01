@@ -18,8 +18,8 @@ sequenceDiagram
         F-->>U: Usuário não autenticado
     end
 
-    C->>+S: getReviewsByUserId(String userId)
-    S->>+R: findAllByAuthorIdAndStatus(String authorId, Status status)
+    C->>+S: getMyReviews(String userId)
+    S->>+R: findAllByAuthorId(String authorId)
     R-->>-S: List<Review>
     S-->>-C: List<Review>
     C-->>-F: HTTP 200

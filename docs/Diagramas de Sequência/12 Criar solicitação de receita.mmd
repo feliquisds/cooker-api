@@ -19,7 +19,7 @@ sequenceDiagram
         F-->>U: Usuário não autenticado
     end
 
-    C->>+S: save(Request request, String userId)
+    C->>+S: createRequest(Request request, String userId)
     S->>+R: save(Request request)
     R-->>-S: Request
 

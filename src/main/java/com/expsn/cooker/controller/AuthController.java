@@ -27,4 +27,10 @@ public class AuthController {
         AuthResponse response = authService.login(request);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    @PostMapping("/recover")
+    public ResponseEntity<Void> recoverPassword(@RequestParam String email) {
+        authService.recover(email);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

@@ -42,9 +42,8 @@ public class RecipeController {
         return ResponseEntity.ok(recipeService.searchRecipes(title, tags, difficulty, authorHandle, ControllerAuthUtils.resolveCurrentUserId(authentication)));
     }
 
-    // requires logged user
     @PostMapping
-    public ResponseEntity<Recipe> create(@RequestBody Recipe recipe, Authentication authentication) {
+    public ResponseEntity<Recipe> save(@RequestBody Recipe recipe, Authentication authentication) {
         String userId = ControllerAuthUtils.resolveRequiredUserId(authentication);
         return ResponseEntity.ok(recipeService.save(recipe, userId));
     }
@@ -55,7 +54,6 @@ public class RecipeController {
         return ResponseEntity.ok(recipeService.update(id, recipe, userId));
     }
 
-    // does not require logged user, but if provided, show the recipe if it's public or if it's private and belongs to the user
     @GetMapping("/{id}")
     public ResponseEntity<Recipe> getRecipeById(@PathVariable String id, Authentication authentication) {
         String userId = ControllerAuthUtils.resolveCurrentUserId(authentication);

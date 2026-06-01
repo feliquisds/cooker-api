@@ -27,12 +27,6 @@ sequenceDiagram
         F-->>U: Livro de receita não encontrado
     end
 
-    break Usuário sem permissão
-        S-->>C: Exception
-        C-->>F: HTTP 412
-        F-->>U: Acesso negado
-    end
-
     S->>+R: save(Recipe recipe)
     R-->>-S: Recipe
 
