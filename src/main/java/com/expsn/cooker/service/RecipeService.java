@@ -1,8 +1,10 @@
 package com.expsn.cooker.service;
 
+import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
@@ -101,7 +103,11 @@ public class RecipeService {
             criteriaList.add(Criteria.where("title").regex(title, "i"));
         }
         if (tags != null && !tags.isEmpty()) {
-            criteriaList.add(Criteria.where("tags").all(tags));
+            for (String tag : tags) {
+                if (tag != null && !tag.isBlank()) {
+                    criteriaList.add(Criteria.where("tags").regex(buildAccentInsensitiveContainsRegex(tag), "i"));
+                }
+            }
         }
         if (diff != null) {
             criteriaList.add(Criteria.where("difficulty").is(diff));
@@ -175,6 +181,37 @@ public class RecipeService {
 
     private boolean isOwner(String ownerId, String userId) {
         return userId != null && ownerId.equals(userId);
+    }
+
+    private String buildAccentInsensitiveContainsRegex(String value) {
+        String normalized = stripAccents(value).trim();
+        StringBuilder regex = new StringBuilder();
+
+        for (int i = 0; i < normalized.length(); i++) {
+            char c = normalized.charAt(i);
+            regex.append(accentInsensitiveCharPattern(c));
+        }
+
+        return regex.toString();
+    }
+
+    private String accentInsensitiveCharPattern(char value) {
+        return switch (Character.toLowerCase(value)) {
+            case 'a' -> "[aàáâãäå]";
+            case 'c' -> "[cç]";
+            case 'e' -> "[eèéêë]";
+            case 'i' -> "[iìíîï]";
+            case 'n' -> "[nñ]";
+            case 'o' -> "[oòóôõö]";
+            case 'u' -> "[uùúûü]";
+            case 'y' -> "[yÿý]";
+            default -> Pattern.quote(String.valueOf(value));
+        };
+    }
+
+    private String stripAccents(String value) {
+        return Normalizer.normalize(value, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}+", "");
     }
 
     private String normalizeHandle(String handle) {

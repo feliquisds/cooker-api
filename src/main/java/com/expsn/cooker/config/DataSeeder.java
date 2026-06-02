@@ -102,8 +102,6 @@ public class DataSeeder implements CommandLineRunner {
                 .build();
         temperoVerde = recipeRepository.save(temperoVerde);
 
-        // 3. CRIAR LIVRO DE RECEITAS (Estrutura Dinâmica/Recursiva)
-        // Criando os itens
         RecipeRef refTemperoVerde = new RecipeRef();
         refTemperoVerde.setRecipeId(temperoVerde.getId());
         refTemperoVerde.setTitle(temperoVerde.getTitle());
