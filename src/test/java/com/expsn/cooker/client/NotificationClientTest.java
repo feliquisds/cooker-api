@@ -7,14 +7,16 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import jakarta.mail.internet.MimeMessage;
+import org.mockito.InjectMocks;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mail.javamail.JavaMailSender;
+
+import com.expsn.cooker.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
 class NotificationClientTest {
@@ -25,12 +27,11 @@ class NotificationClientTest {
     @Mock
     private MimeMessage mimeMessage;
 
-    private NotificationClient notificationClient;
+    @Mock
+    private UserRepository userRepository;
 
-    @BeforeEach
-    void setUp() {
-        notificationClient = new NotificationClient(mailSender, "no-reply@cooker.test");
-    }
+    @InjectMocks
+    private NotificationClient notificationClient;
 
     @Test
     void sendRecoveryEmailBuildsAndSendsMessage() {

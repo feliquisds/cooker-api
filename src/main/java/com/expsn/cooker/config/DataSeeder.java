@@ -43,6 +43,22 @@ public class DataSeeder implements CommandLineRunner {
         }
         logger.info(">>> CONECTADO AO BANCO: " + mongoTemplate.getDb().getName());
 
+        User felix = User.builder()
+                .handle("feliquisds")
+                .name("Felix")
+                .email("feliquisds@outlook.com")
+                .password("$2a$10$gtpa8C/.4O4ThZHAm6YlsuaWLp8RBJZrBwGrHJIkBRXWxCUuUd7A2")
+                .isPrivate(true)
+                .avatarUrl(null)
+                .birthDate(LocalDate.of(2005, 8, 3))
+                .favoriteRecipeIds(null)
+                .recipeNotificationTags(List.of("doce"))
+                .requestNotificationTags(null)
+                .savedBookIds(null)
+                .rating(0)
+                .build();
+        felix = userRepository.save(felix);
+
         User rafa = User.builder()
                 .id("69f809bbd6ac64744e5db1a0")
                 .handle("rafafafa")
@@ -61,60 +77,60 @@ public class DataSeeder implements CommandLineRunner {
                 .build();
         rafa = userRepository.save(rafa);
 
-        RecipeBook meuLivro = RecipeBook.builder()
-                .id("69f809bbd6ac64744e5db1a5")
-                .ownerId(rafa.getId())
-                .title("Receitas IV")
-                .tags(List.of("temperos"))
-                .descriptionMD("Meu objetivo aqui é ensinar que qualquer um (sim, até você!) pode aprender a cozinhar. Todas as receitas nesse site foram testadas e aprovadas por mim, então meticulosamente adaptadas e traduzidas (quando necessário).")
-                .isPublic(true)
-                .items(null)
-                .rating(0)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
-        meuLivro = bookRepository.save(meuLivro);
+        // RecipeBook meuLivro = RecipeBook.builder()
+        //         .id("69f809bbd6ac64744e5db1a5")
+        //         .ownerId(rafa.getId())
+        //         .title("Receitas IV")
+        //         .tags(List.of("temperos"))
+        //         .descriptionMD("Meu objetivo aqui é ensinar que qualquer um (sim, até você!) pode aprender a cozinhar. Todas as receitas nesse site foram testadas e aprovadas por mim, então meticulosamente adaptadas e traduzidas (quando necessário).")
+        //         .isPublic(true)
+        //         .items(null)
+        //         .rating(0)
+        //         .createdAt(LocalDateTime.now())
+        //         .updatedAt(LocalDateTime.now())
+        //         .build();
+        // meuLivro = bookRepository.save(meuLivro);
 
-        Recipe temperoVerde = Recipe.builder()
-                .id("69f809bbd6ac64744e5db1a1")
-                .authorId(rafa.getId())
-                .bookOriginId(meuLivro.getId())
-                .title("Tempero verde")
-                .difficulty(Difficulty.EASY)
-                .timeMinutes(5)
-                .images(null)
-                .isPublic(true)
-                .tags(List.of("tempero", "rápida", "vegana"))
-                .descriptionMD("Este tempero é frequentemente usado para marinar carnes na culinária mineira: esta receita é a do restaurante Gosto Com Gosto, um dos meus favoritos em Visconde de Mauá.\n\nEsta receita foi adaptada do livro Interpretações do Gosto, da autora Mônica Rangel.\n\nEquipamento especial: um processador de alimentos.")
-                .ingredientSections(List.of(
-                        IngredientSection.builder()
-                                .title(null)
-                                .ingredients(List.of(
-                                        "2 cebolas",
-                                        "1 pimentão verde",
-                                        "5 dentes de alho",
-                                        "100 g de cheiro verde (salsinha e cebolinha em partes iguais)"
-                                ))
-                                .build()
-                ))
-                .stepsMD(List.of("Bata todos os ingredientes no processador de alimentos. O tempero dura até 3 dias na geladeira."))
-                .rating(0)
-                .build();
-        temperoVerde = recipeRepository.save(temperoVerde);
+        // Recipe temperoVerde = Recipe.builder()
+        //         .id("69f809bbd6ac64744e5db1a1")
+        //         .authorId(rafa.getId())
+        //         .bookOriginId(meuLivro.getId())
+        //         .title("Tempero verde")
+        //         .difficulty(Difficulty.EASY)
+        //         .timeMinutes(5)
+        //         .images(null)
+        //         .isPublic(true)
+        //         .tags(List.of("tempero", "rápida", "vegana"))
+        //         .descriptionMD("Este tempero é frequentemente usado para marinar carnes na culinária mineira: esta receita é a do restaurante Gosto Com Gosto, um dos meus favoritos em Visconde de Mauá.\n\nEsta receita foi adaptada do livro Interpretações do Gosto, da autora Mônica Rangel.\n\nEquipamento especial: um processador de alimentos.")
+        //         .ingredientSections(List.of(
+        //                 IngredientSection.builder()
+        //                         .title(null)
+        //                         .ingredients(List.of(
+        //                                 "2 cebolas",
+        //                                 "1 pimentão verde",
+        //                                 "5 dentes de alho",
+        //                                 "100 g de cheiro verde (salsinha e cebolinha em partes iguais)"
+        //                         ))
+        //                         .build()
+        //         ))
+        //         .stepsMD(List.of("Bata todos os ingredientes no processador de alimentos. O tempero dura até 3 dias na geladeira."))
+        //         .rating(0)
+        //         .build();
+        // temperoVerde = recipeRepository.save(temperoVerde);
 
-        RecipeRef refTemperoVerde = new RecipeRef();
-        refTemperoVerde.setRecipeId(temperoVerde.getId());
-        refTemperoVerde.setTitle(temperoVerde.getTitle());
+        // RecipeRef refTemperoVerde = new RecipeRef();
+        // refTemperoVerde.setRecipeId(temperoVerde.getId());
+        // refTemperoVerde.setTitle(temperoVerde.getTitle());
 
-        Category temperosCategory = new Category();
-        temperosCategory.setName("Temperos");
-        temperosCategory.setItems(List.of(refTemperoVerde));
+        // Category temperosCategory = new Category();
+        // temperosCategory.setName("Temperos");
+        // temperosCategory.setItems(List.of(refTemperoVerde));
 
-        meuLivro.setItems(List.of(temperosCategory));
-        bookRepository.save(meuLivro);
+        // meuLivro.setItems(List.of(temperosCategory));
+        // bookRepository.save(meuLivro);
 
-        rafa.setSavedBookIds(List.of(meuLivro.getId()));
-        userRepository.save(rafa);
+        // rafa.setSavedBookIds(List.of(meuLivro.getId()));
+        // userRepository.save(rafa);
 
         logger.info(">>> Banco de Dados COOKER populado com sucesso! <<<");
     }
