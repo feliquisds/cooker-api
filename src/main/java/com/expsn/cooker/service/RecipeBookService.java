@@ -37,7 +37,7 @@ public class RecipeBookService {
     private final UserService userService;
 
     public RecipeBook save(RecipeBook book, String userId) {
-        var editing = book.getId() != null;
+        var editing = book.getId() != null && !book.getId().isBlank();
         if (editing) {
             RecipeBook existing = recipeBookRepository.findById(book.getId())
                     .orElseThrow(() -> new ItemException("Livro de receita não encontrado"));
@@ -46,6 +46,7 @@ public class RecipeBookService {
                 throw new BusinessException("Acesso negado a este livro");
             }
         } else {
+            book.setId(null);
             book.setCreatedAt(LocalDateTime.now());
             book.setUpdatedAt(LocalDateTime.now());
             book.setOwnerId(userId);
@@ -67,6 +68,7 @@ public class RecipeBookService {
             throw new BusinessException("Acesso negado a este livro");
         }
 
+        deleteBookContent(book.getItems());
         recipeBookRepository.deleteById(id);
         userService.removeRecipeBookFromSaved(userId, id);
     }
@@ -185,5 +187,21 @@ public class RecipeBookService {
 
     private String normalizeHandle(String handle) {
         return handle.replace("@", "").trim();
+    }
+
+    private void deleteBookContent(List<BookComponent> items) {
+        if (items == null || items.isEmpty()) {
+            return;
+        }
+
+        for (BookComponent item : items) {
+            if (item instanceof RecipeRef ref) {
+                recipeRepository.deleteById(ref.getRecipeId());
+            } else if (item instanceof TextRef ref) {
+                textRepository.deleteById(ref.getTextId());
+            } else if (item instanceof Category cat) {
+                deleteBookContent(cat.getItems());
+            }
+        }
     }
 }

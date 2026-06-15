@@ -10,12 +10,14 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.FieldType;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
 @Document(collection = "recipe_books")
 @Data
 @Builder
+@AllArgsConstructor
 public class RecipeBook {
     @Id
     private String id;

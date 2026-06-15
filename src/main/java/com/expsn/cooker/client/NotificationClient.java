@@ -54,7 +54,7 @@ public class NotificationClient {
                 helper.setSubject("Nova receita que pode te interessar - Cooker");
                 helper.setText(buildRecipeInterestText(recipe), buildRecipeInterestHtml(recipe));
                 mailSender.send(message);
-            } catch (MessagingException ex) {
+            } catch (Exception ex) {
                 // Log the exception and continue with the next user
                 System.err.println("Failed to send notification email to " + user.getEmail() + ": " + ex.getMessage());
             }

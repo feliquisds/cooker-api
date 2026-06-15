@@ -49,7 +49,7 @@ public class RecipeService {
     }
 
     public Recipe save(Recipe recipe, String userId) {
-        var editing = recipe.getId() != null;
+        var editing = recipe.getId() != null && !recipe.getId().isBlank();
         RecipeBook book = recipeBookRepository.findById(recipe.getBookOriginId())
                 .orElseThrow(() -> new ItemException("Livro de receita não encontrado"));
 
@@ -58,6 +58,7 @@ public class RecipeService {
         }
 
         if (!editing) {
+            recipe.setId(null);
             recipe.setBookOriginId(book.getId());
             recipe.setCreatedAt(LocalDateTime.now());
             recipe.setRating(0);
