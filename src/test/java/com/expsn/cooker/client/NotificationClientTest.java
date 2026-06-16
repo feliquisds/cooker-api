@@ -15,6 +15,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.expsn.cooker.repository.UserRepository;
 
@@ -35,6 +36,7 @@ class NotificationClientTest {
 
     @Test
     void sendRecoveryEmailBuildsAndSendsMessage() {
+        ReflectionTestUtils.setField(notificationClient, "fromAddress", "cooker@example.com");
         when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
 
         notificationClient.sendRecoveryEmail("user@example.com");
