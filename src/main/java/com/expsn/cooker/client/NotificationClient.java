@@ -22,12 +22,18 @@ public class NotificationClient {
     private final JavaMailSender mailSender;
     private final UserRepository userRepository;
     private final String fromAddress;
+    private final String frontendUrl;
 
     @Autowired
-    public NotificationClient(JavaMailSender mailSender, UserRepository userRepository, @Value("${app.mail.from:${spring.mail.username:}}") String fromAddress) {
+    public NotificationClient(
+            JavaMailSender mailSender,
+            UserRepository userRepository,
+            @Value("${app.mail.from:${spring.mail.username:}}") String fromAddress,
+            @Value("${FRONTEND_URL:}") String frontendUrl) {
         this.mailSender = mailSender;
         this.userRepository = userRepository;
         this.fromAddress = fromAddress;
+        this.frontendUrl = frontendUrl;
     }
 
     @Async
@@ -103,26 +109,35 @@ public class NotificationClient {
     }
 
     private String buildRecipeInterestText(Recipe recipe) {
+        String recipeUrl = buildRecipeUrl(recipe);
+
         return String.join("\n",
                 "Olá,",
                 "",
                 "Uma nova receita que pode te interessar foi publicada: " + recipe.getTitle(),
-                "Confira no aplicativo!",
+            "Acesse aqui: " + recipeUrl,
                 "",
                 "Equipe Cooker");
     }
 
     private String buildRecipeInterestHtml(Recipe recipe) {
+        String recipeUrl = buildRecipeUrl(recipe);
+
         return """
                 <html>
                   <body style="font-family: Arial, sans-serif; color: #1f2937; line-height: 1.5;">
                     <p>Olá,</p>
-                    <p>Uma nova receita que pode te interessar foi publicada: <strong>%s</strong>.</p>
-                    <p>Confira no aplicativo!</p>
+                <p>Uma nova receita que pode te interessar foi publicada: <a href="%s"><strong>%s</strong></a>.</p>
+                <p>Acesse diretamente: <a href="%s">%s</a></p>
                     <p>Equipe Cooker</p>
                   </body>
                 </html>
-                """.formatted(recipe.getTitle());
+            """.formatted(recipeUrl, recipe.getTitle(), recipeUrl, recipeUrl);
+    }
+
+    private String buildRecipeUrl(Recipe recipe) {
+        String normalizedFrontendUrl = frontendUrl == null ? "" : frontendUrl.replaceAll("/+$", "");
+        return normalizedFrontendUrl + "/recipe/" + recipe.getId();
     }
 
     private String buildRecoveryHtml(String email) {
